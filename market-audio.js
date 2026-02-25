@@ -1,0 +1,1 @@
+!function(){try{window.siteMusicEnabled=!1;try{localStorage.setItem("site-music","off")}catch(t){}try{var e=document.getElementById("piyoverse-music");e&&(e.pause&&e.pause(),e.volume=0)}catch(t){}}catch(t){}}();

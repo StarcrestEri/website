@@ -1,0 +1,374 @@
+/* Legacy low-end support (Opera 9.5 / NetFront NX / Nintendo browsers)
+   Only applies when <html> has class "legacy-lowend".
+*/
+
+html.legacy-lowend,
+html.legacy-lowend body {
+  background: #031024;
+  color: #ffffff;
+}
+
+html.legacy-lowend {
+  /* Scale the whole UI down for tiny screens (DSi). */
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+html.legacy-lowend body {
+  /* Keep content off the very edges on tiny screens (DSi). */
+  padding: 4px;
+  text-align: center;
+}
+
+html.legacy-lowend::before,
+html.legacy-lowend::after,
+html.legacy-lowend body::before,
+html.legacy-lowend body::after {
+  content: none !important;
+  display: none !important;
+}
+
+html.legacy-lowend * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Layout: drop modern grid/flex assumptions */
+html.legacy-lowend main,
+html.legacy-lowend nav,
+html.legacy-lowend section,
+html.legacy-lowend article,
+html.legacy-lowend figure,
+html.legacy-lowend header,
+html.legacy-lowend footer {
+  display: block;
+}
+
+html.legacy-lowend .nav-container {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 auto;
+  padding: 4px;
+  text-align: center;
+  background: #071a2b;
+  border: 2px double #2b6fa0;
+  border-radius: 4px;
+  box-shadow: none !important;
+}
+
+html.legacy-lowend .nav-logo {
+  display: block;
+  width: 48px !important;
+  height: 48px !important;
+  overflow: hidden;
+  margin: 0 auto 6px;
+}
+
+html.legacy-lowend .nav-logo img {
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  display: block;
+}
+
+html.legacy-lowend .nav-item {
+  display: inline-block;
+  margin: 4px;
+  padding: 3px 6px;
+  border: 2px double #2b6fa0;
+  background: #0b2a44;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+/* Legacy back button: use a small circular CSS button (no image). */
+html.legacy-lowend .panel-back {
+  position: static !important;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  margin: 6px auto 0;
+  padding: 0;
+  text-align: center;
+  background: #0b2a44;
+  border: 2px double #2b6fa0;
+  border-radius: 999px;
+  color: #ffffff;
+  text-decoration: none;
+}
+html.legacy-lowend .panel-back img { display: none !important; }
+html.legacy-lowend .panel-back .panel-back-icon {
+  display: inline;
+  font-size: 18px;
+  font-weight: 700;
+}
+/* Don't reserve space for the absolute-positioned back button in legacy mode. */
+html.legacy-lowend .panel-back + section { padding-top: 0 !important; }
+
+/* Some higher-capability browsers (e.g., PSP) can apply the modern theme's
+   decorative pseudo-elements. Disable them so legacy visuals are consistent. */
+html.legacy-lowend .nav-item::before,
+html.legacy-lowend .nav-item::after,
+html.legacy-lowend .btn::before,
+html.legacy-lowend .btn::after,
+html.legacy-lowend .game-actions .btn::before,
+html.legacy-lowend .game-actions .btn::after {
+  content: none !important;
+  display: none !important;
+}
+
+html.legacy-lowend .page-name-container,
+html.legacy-lowend main,
+html.legacy-lowend .social-bar,
+html.legacy-lowend .site-footer,
+html.legacy-lowend footer {
+  width: auto !important;
+  max-width: none !important;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 360px) {
+  html.legacy-lowend .nav-container,
+  html.legacy-lowend .page-name-container,
+  html.legacy-lowend main,
+  html.legacy-lowend .social-bar,
+  html.legacy-lowend .site-footer,
+  html.legacy-lowend footer {
+    max-width: 240px !important;
+  }
+}
+
+/* PSP has a wider viewport than DSi; force the same narrow legacy layout so
+   PSP matches the DSi "Ice Cream Mini" look. */
+html.legacy-lowend.psp .nav-container,
+html.legacy-lowend.psp .page-name-container,
+html.legacy-lowend.psp main,
+html.legacy-lowend.psp .social-bar,
+html.legacy-lowend.psp .site-footer,
+html.legacy-lowend.psp footer {
+  max-width: 240px !important;
+}
+
+html.legacy-lowend main {
+  padding: 4px;
+  text-align: center;
+}
+
+/* Panels: simple solid background and border */
+html.legacy-lowend main,
+html.legacy-lowend .bg-popover,
+html.legacy-lowend .site-footer {
+  background: #071a2b;
+  border: 2px double #2b6fa0;
+  border-radius: 4px;
+  box-shadow: none !important;
+}
+
+/* DSi + PSP: round the Mini panels more (matches the rounder look of other Mini variants). */
+html.legacy-lowend.dsi .nav-container,
+html.legacy-lowend.dsi main,
+html.legacy-lowend.dsi .site-footer,
+html.legacy-lowend.psp .nav-container,
+html.legacy-lowend.psp main,
+html.legacy-lowend.psp .site-footer {
+  border-radius: 12px;
+}
+
+/* Games/music listings: IE11-style layout (small thumb at left) */
+html.legacy-lowend .game-grid {
+  display: block;
+}
+
+html.legacy-lowend .game-card {
+  display: block;
+  margin: 8px 0;
+  padding: 4px;
+  overflow: hidden;
+  text-align: center;
+}
+
+html.legacy-lowend .game-card::before,
+html.legacy-lowend .game-card::after {
+  box-shadow: none !important;
+  background-image: none !important;
+}
+
+html.legacy-lowend .game-thumb {
+  float: none;
+  width: 85px;
+  height: 85px;
+  margin: 0 auto 6px;
+}
+
+html.legacy-lowend .game-thumb img {
+  width: 85px !important;
+  height: 85px !important;
+  display: block;
+}
+
+/* DSi + PSP: use native 64x64 listing thumbs (no upscaling). */
+html.legacy-lowend.dsi .game-thumb,
+html.legacy-lowend.psp .game-thumb {
+  width: 64px;
+  height: 64px;
+}
+html.legacy-lowend.dsi .game-thumb img,
+html.legacy-lowend.psp .game-thumb img {
+  width: 64px !important;
+  height: 64px !important;
+}
+
+html.legacy-lowend .game-info {
+  overflow: hidden;
+}
+
+/* PSP: reduce memory usage aggressively.
+   The PSP browser tends to run out of memory quickly on image-heavy pages.
+   Hide most images, but allow small UI icons plus listing thumbs and the Starcrest teaser
+   (which are swapped to the smaller "Ice Cream Mini" versions by `legacy-lowend.js`). */
+html.legacy-lowend.psp main img {
+  display: none !important;
+}
+
+html.legacy-lowend.psp .nav-logo img,
+html.legacy-lowend.psp .panel-back img {
+  display: inline-block !important;
+}
+
+html.legacy-lowend.psp .game-thumb img,
+html.legacy-lowend.psp img.starcrest-teaser {
+  display: block !important;
+}
+
+html.legacy-lowend img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+html.legacy-lowend .legal-note,
+html.legacy-lowend p[data-i18n="footer-copy"] {
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+html.legacy-lowend .game-actions {
+  position: static !important;
+  right: auto !important;
+  top: auto !important;
+  transform: none !important;
+  margin-top: 6px;
+}
+
+/* Social links: force a horizontal row and avoid cropped icons.
+   Old engines may not support background-size, so use 48x48 icon assets. */
+html.legacy-lowend .social-bar {
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  padding: 6px 0 4px 0;
+  margin: 10px auto 0;
+}
+html.legacy-lowend .social-item {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 2px;
+}
+html.legacy-lowend .social-link {
+  /* Use 48x48 icon assets (older engines may not support background-size). */
+  width: 48px;
+  height: 48px;
+  display: inline-block;
+  border-radius: 10px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+html.legacy-lowend .social-label {
+  display: block;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.15;
+  margin-top: 4px;
+}
+html.legacy-lowend .social-youtube { background-image: url('Images/youtubeicon-48.png') !important; }
+html.legacy-lowend .social-discord { background-image: url('Images/discordicon-48.png') !important; }
+html.legacy-lowend .social-bsky { background-image: url('Images/bskyicon-48.png') !important; }
+html.legacy-lowend .social-twt { background-image: url('Images/twticon-48.png') !important; }
+
+/* IE7 mode (or IE7-like compatibility): apply IE7 layout quirks fixes.
+   - IE7 does not reliably support inline-block on all elements.
+   - Give key containers "hasLayout" so borders wrap contents.
+   - Force thumbs to a small size so they don't fill the viewport.
+*/
+html.ie7.legacy-lowend .nav-container,
+html.ie7.legacy-lowend .page-name-container,
+html.ie7.legacy-lowend main,
+html.ie7.legacy-lowend .social-bar,
+html.ie7.legacy-lowend .site-footer,
+html.ie7.legacy-lowend footer {
+  zoom: 1;
+}
+
+/* Keep nav items on one line in IE7. */
+html.ie7.legacy-lowend .nav-item {
+  display: inline;
+  zoom: 1;
+}
+
+/* Social icons: force a horizontal row in IE7. */
+html.ie7.legacy-lowend .social-bar {
+  white-space: nowrap;
+}
+html.ie7.legacy-lowend .social-item {
+  display: inline;
+  zoom: 1;
+}
+html.ie7.legacy-lowend .social-link {
+  display: inline;
+  zoom: 1;
+}
+
+/* Listings: clamp thumbnail size hard so images never take over the screen.
+   (Also overrides the global `html.legacy-lowend img { height:auto !important; }` rule.) */
+html.ie7.legacy-lowend .game-thumb {
+  width: 64px;
+  height: 64px;
+}
+html.ie7.legacy-lowend .game-thumb img {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  -ms-interpolation-mode: bicubic;
+}
+
+html.legacy-lowend .btn,
+html.legacy-lowend button,
+html.legacy-lowend input[type="button"],
+html.legacy-lowend input[type="submit"],
+html.legacy-lowend .game-actions .btn,
+html.legacy-lowend .marketplace-btn {
+  display: inline-block;
+  width: auto !important;
+  min-width: 0 !important;
+  padding: 3px 6px;
+  border: 2px double #2b6fa0;
+  background: #0b2a44;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 8px;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+html.legacy-lowend .section-separator,
+html.legacy-lowend .footer-divider {
+  border: none;
+  height: 1px;
+  background: #2b6fa0;
+  margin: 12px 0;
+}

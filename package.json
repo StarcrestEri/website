@@ -1,0 +1,11 @@
+{
+  "name": "piyoverse-site",
+  "private": true,
+  "devDependencies": {
+    "terser": "^5.30.3"
+  },
+  "scripts": {
+    "minify": "powershell -NoProfile -ExecutionPolicy Bypass -File ./minify.ps1",
+    "build": "node ./scripts/build.js"
+  }
+}

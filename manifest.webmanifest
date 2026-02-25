@@ -1,0 +1,17 @@
+﻿{
+  "name": "Ice Cream 0.1",
+  "short_name": "Ice Cream",
+  "start_url": "/?force_ie11=1",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#021826",
+  "theme_color": "#021826",
+  "icons": [
+    {
+      "src": "/Images/piyoverse.png",
+      "sizes": "any",
+      "type": "image/png"
+    }
+  ]
+}
+
