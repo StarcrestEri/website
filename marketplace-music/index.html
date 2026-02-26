@@ -1,278 +1,1010 @@
-﻿<!DOCTYPE html>
-<html lang="en" class="site-theme ice-cream" data-theme-mode="light" data-theme="opal">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Piyoverse — Marketplace (Music)</title>
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#021826">
-    <link rel="stylesheet" href="/Ice Cream.css">
-    <link rel="canonical" href="/marketplace-music/" />
-    <script src="/ie-compat.js"></script>
-    <script src="/legacy-lowend.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ピヨバースエンターテインメント</title>
+<style id="mainStyles">
+html, body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    transition: background 0.3s;
+    color: #4b2e3e;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+    background-color: var(--bg-secondary, #ffffff);
+}
 
+html {
+    background-color: var(--bg-secondary, #ffffff);
+}
+
+.panel {
+    background-color: #fff0f5;
+    max-width: 800px;
+    width: 100%;
+    padding: 25px;
+    border-radius: 12px;
+    /* アウトラインは以前のシェーン/シャドウの代替です。よりタイトで太い線にします */
+    outline: 15px solid var(--panel-dark-strong, rgba(0,0,0,1));
+    outline-offset: 0;
+    position: relative;
+    transition: background-color 0.3s, color 0.3s;
+    z-index: 2000;
+    overflow: hidden;
+}
+
+#employeesPage { margin: 20px auto; display: none; }
+.panel > * { position: relative; z-index: 2; }
+
+h1, h2, h3, h4 {
+    text-align: center;
+    margin-top: 0;
+    /* テーマに応じたテキスト色を使用（既定は以前のマゼンタ） */
+    color: var(--panel-text, #c71585);
+}
+
+/* Sprite left of panel title */
+.title-row { display:flex; align-items:center; justify-content:center; gap:12px; }
+.title-row h1 { margin: 0; line-height: 1.05; }
+/* Use object-fit to preserve intrinsic aspect ratio and nearest-neighbour scaling for pixel art */
+#panelSprite { display:block; width:64px; height:64px; flex:0 0 64px; object-fit: contain; image-rendering: pixelated; image-rendering: crisp-edges; -ms-interpolation-mode: nearest-neighbor; border-radius:6px; }
+
+.section { margin-bottom: 35px; }
+
+a { color: #ff69b4; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.game {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #ffe4f0;
+    border: 1px solid rgba(0,0,0,0.18);
+    border-radius: 8px;
+    transition: background-color 0.3s, box-shadow 0.2s, outline-color 0.2s;
+}
+
+.game:hover {
+    outline: 1px solid var(--panel-text, #c71585);
+    box-shadow: inset 0 0 0 1px var(--panel-text, #c71585);
+}
+
+/* Keep listing heights stable across language switches (EN/JP) */
+.game[data-game-id="alia"] { min-height: 380px; }
+.game[data-game-id="starcrest1"],
+.game[data-game-id="starcrest2"] { min-height: 150px; }
+.game[data-game-id="starcrest-saga"] { min-height: 185px; }
+
+/* 今後のリスト：ゲーム間の区切りを含む表示領域 */
+.upcoming-list {
+    background: transparent;
+    padding: 10px 0;
+}
+.upcoming-list .game {
+    background-color: rgba(255,255,255,0.04);
+    margin: 0 0 16px 0;
+    padding: 18px;
+    border-radius: 8px;
+}
+.upcoming-list .game + .game {
+    border-top: 1px solid rgba(0,0,0,0.12);
+    margin-top: 18px;
+    padding-top: 18px;
+}
+.game-meta { font-size: 0.95em; }
+
+/* Per-game translucent backgrounds */
+.game.bg-riayah,
+.game.bg-alia1,
+.game.bg-starcrest2,
+.game.bg-starcrestsaga { position: relative; overflow: hidden; }
+
+.game.bg-riayah::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    /* allow pseudo-element taller than container so top-of-image is preserved when scaling width */
+    height: 200%;
+    background-image: var(--riayah, none);
+    background-size: 100% auto; /* scale width only */
+    background-position: top center; /* reverted placement */
+    background-repeat: no-repeat;
+    opacity: 0.18;
+    pointer-events: none;
+    z-index: 0;
+}
+/* ensure game content sits above the pseudo background */
+.game.bg-riayah > * { position: relative; z-index: 2; }
+
+.game.bg-alia1::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background-image: var(--alia1, none);
+    background-size: contain;
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 0;
+}
+.game.bg-alia1 > * { position: relative; z-index: 2; }
+
+.game.bg-starcrest2::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background-image: var(--starcrest2, none);
+    background-size: contain;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 0;
+}
+.game.bg-starcrest2 > * { position: relative; z-index: 2; }
+
+.game.bg-starcrestsaga::before{
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background-image: var(--starcrestsaga, none);
+    background-size: contain;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    opacity: 0.16;
+    pointer-events: none;
+    z-index: 0;
+}
+.game.bg-starcrestsaga > * { position: relative; z-index: 2; }
+
+.footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+/* 設定 */
+#settingsBtn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    z-index: 3000;
+    transition: box-shadow 0.2s, outline-color 0.2s;
+}
+
+#settingsBtn:hover {
+    outline: 1px solid currentColor;
+    box-shadow: inset 0 0 0 1px currentColor;
+}
+
+#settingsPanel {
+    display: none;
+    position: fixed;
+    top: 64px;
+    right: 20px;
+    background: #fff0f5;
+    border: 1px solid #c71585;
+    border-radius: 10px;
+    padding: 15px;
+    z-index: 3000;
+    width: 220px;
+}
+
+#settingsPanel label, #settingsPanel select, #settingsPanel button {
+    display: block;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+/* 背景パターン */
+body.stripes {
+    background: repeating-linear-gradient(
+        45deg,
+        var(--bg-color) 0,
+        var(--bg-color) 120px,
+        var(--bg-secondary, #ffffff) 120px,
+        var(--bg-secondary, #ffffff) 240px
+    );
+    background-attachment: fixed;
+    background-repeat: repeat;
+}
+
+/* theme-abstract がある場合、body の背景を削除しない（抽象アートを維持） */
+body.polka {
+    background: none;
+}
+
+/* ドットを斜めに配置するための回転オーバーレイによるポルカドットパターン */
+body.polka::before{
+    content: "";
+    position: fixed;
+    /* 回転で隙間が生じないようにオーバーレイをビューポートより大きくする */
+    /* すべてのビューポートサイズで覆うためさらに拡大 */
+    left: -100vw;
+    top: -100vh;
+    width: 300vw;
+    height: 300vh;
+    z-index: 0;
+    pointer-events: none;
+    background-color: var(--bg-secondary, #ffffff);
+    /* 192px タイル — ドットは大きく接触する（半径50%）。必要に応じて調整 */
+    background-image: radial-gradient(circle, var(--bg-color) 50%, var(--bg-secondary, #ffffff) 50%);
+    background-size: 192px 192px;
+    transform: rotate(45deg);
+    transform-origin: center center;
+    background-repeat: repeat;
+}
+
+body.solid { background: var(--bg-color); }
+
+</style>
 </head>
 <body>
-    <nav class="nav-container">
-        <a class="nav-logo" href="/" aria-label="Home">
-            <img src="/Images/piyoverse.png" alt="Piyoverse">
-        </a>
-        <a class="nav-item" href="/" data-i18n="nav-home">Home</a>
-        <a class="nav-item" href="/marketplace/" data-i18n="nav-marketplace">Marketplace</a>
-        <a class="nav-item" href="/about/" data-i18n="nav-about">About</a>
-    </nav>
 
-    <div class="page-name-container">
-        <div class="page-name" data-i18n="music-page-name">Music</div>
+<div class="panel" id="mainPanel">
+
+<button id="settingsBtn">Settings</button>
+
+<div id="settingsPanel">
+    <label for="languageSelect">言語 / Language:</label>
+    <select id="languageSelect">
+        <option value="ja">日本語</option>
+        <option value="en">English</option>
+    </select>
+
+    <label for="themeSelect">テーマ / Theme:</label>
+    <select id="themeSelect">
+        <option value="blueberry">Blueberry Muffin</option>
+        <option value="raspberry">Raspberry Jam</option>
+        <option value="chocolate">Chocolate Cake</option>
+        <option value="lemonade">Lemonade</option>
+        <option value="keylime">Key Lime Pie</option>
+        <option value="plum">Plump Plum</option>
+        <option value="vanilla">Vanilla Ice Cream</option>
+        <option value="licorice">Black Licorice</option>
+        <option value="juicy">Juicy Blue</option>
+        <option value="strawberry">Strawberry Cream</option>
+        <option value="cherry">Cherry Tart</option>
+    </select>
+
+    <label for="patternSelect">背景パターン / Background Pattern:</label>
+    <select id="patternSelect">
+        <option value="stripes">Stripes</option>
+        <option value="polka">Polka Dots</option>
+        <option value="solid">Solid</option>
+    </select>
+
+    <label for="cssToggle">CSSを有効 / Enable CSS:</label>
+    <input type="checkbox" id="cssToggle" />
+
+    <label for="scriptToggle">スクリプトを有効 / Enable Scripts:</label>
+    <input type="checkbox" id="scriptToggle" />
+    
+    <label for="darkToggle">ダークモード / Dark Mode:</label>
+    <input type="checkbox" id="darkToggle" />
+
+    <button id="resetBtn">Reset Preferences</button>
+</div>
+
+<div class="title-row"><img id="panelSprite" alt="Alia sprite" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='48'><rect width='48' height='48' fill='%23ffe4f0'/><circle cx='24' cy='20' r='10' fill='%23ff69b4'/></svg>"/><h1 id="headerTitle">ピヨバースエンターテインメントへようこそ！ (≧◡≦)</h1></div>
+<p id="introText" style="text-align:center;">
+ピヨバースエンターテインメントは、アクション満載のゲームと魅力的な音楽作品に注力するグローバル企業です。
+</p>
+
+<!-- Games -->
+<div class="section">
+<h2 id="gamesTitle">ゲーム</h2>
+
+<div class="game" data-game-id="alia">
+<h3>アリアと失われた星たち</h3>
+<p>
+ある夜、若きアリアはぐっすり眠れることを願ってベッドに入りました…しかし、深い昏睡に落ち、夢の世界へ迷い込んでしまいます。  
+夢の世界を旅する中で、ずっと夢の中にいる少女サリアに出会います。  
+自分の世界に戻るには、散らばった星たちを集めなければなりません。  
+ヴォルテックスが夢の世界に侵入しており、最後にはヴォルテックスクイーンが待ち受けています。  
+夢の世界にはトラップが仕掛けられているので、足元に注意してください。
+</p>
+<p>
+<strong>発売日:</strong> 2026/02/21<br>
+<strong>プラットフォーム:</strong> SG-1000<br>
+<strong>開発:</strong> ピヨバースエンターテインメント<br>
+<strong>プレイヤー:</strong> 1人<br>
+<strong>ジャンル:</strong> プラットフォーマー
+</p>
+<p>
+購入はこちら: 
+<a href="https://stardusteri.itch.io/alia-and-the-lost-stars" target="_blank">アリアと失われた星たち</a>
+</p>
+</div>
+
+<h3 id="upcomingTitle">今後のゲーム</h3>
+
+<div class="upcoming-list">
+    <div class="game" data-game-id="starcrest1">
+        <h4>スタークレスト</h4>
+        <p class="game-desc"></p>
+        <p class="game-meta"><strong>発売日:</strong> TBA<br><strong>プラットフォーム:</strong> Mark III<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー</p>
     </div>
 
-    <main>
-            <a class="panel-back" href="/marketplace/" aria-label="Back to Marketplace">
-            <span class="panel-back-icon" aria-hidden="true">&#x2190;</span>
-            <span class="panel-back-text">Back</span>
-        </a>
-        <section>
-            <h2 class="games-section-title section-large">Piyoverse Originals</h2>
-            <div class="game-grid">
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/スタークレスト.jpg" alt="スタークレスト">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">スタークレスト</h3>
-                        <p class="game-meta">Album &mdash; Released March 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/-" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/-" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Starcrest Adventure.jpg" alt="Starcrest Adventure">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Starcrest Adventure</h3>
-                        <p class="game-meta">Album &mdash; Released October 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/starcrest-adventure" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/starcrest-adventure" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Sweet Cruisin'.jpg" alt="Sweet Cruisin'">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Sweet Cruisin'</h3>
-                        <p class="game-meta">Single &mdash; Released January 2023</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/track/sweet-cruisin" data-bandcamp-popup="https://piyoverse.bandcamp.com/track/sweet-cruisin" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Hexpress.jpg" alt="Hexpress">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Hexpress</h3>
-                        <p class="game-meta">Album &mdash; Released June 2023</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/hexpress" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/hexpress" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Dungeon Escape.jpg" alt="Dungeon Escape">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Dungeon Escape</h3>
-                        <p class="game-meta">Single &mdash; Released March 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/track/dungeon-escape" data-bandcamp-popup="https://piyoverse.bandcamp.com/track/dungeon-escape" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Astro-Dreams.jpg" alt="Astro-Dreams">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Astro-Dreams</h3>
-                        <p class="game-meta">Album &mdash; Released March 2023</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/astro-dreams" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/astro-dreams" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Ocean 542.jpg" alt="Ocean 542">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Ocean 542</h3>
-                        <p class="game-meta">Album &mdash; Released August 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/ocean-542" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/ocean-542" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Picnic With You.jpg" alt="Picnic With You">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Picnic With You</h3>
-                        <p class="game-meta">Single &mdash; Released December 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/track/picnic-with-you" data-bandcamp-popup="https://piyoverse.bandcamp.com/track/picnic-with-you" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/blood on the floor.jpg" alt="blood on the floor">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">blood on the floor</h3>
-                        <p class="game-meta">Album &mdash; Released March 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/album/blood-on-the-floor" data-bandcamp-popup="https://piyoverse.bandcamp.com/album/blood-on-the-floor" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Astro-Dreams%20(Single).jpg" alt="Astro-Dreams (Single)">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Astro-Dreams</h3>
-                        <p class="game-meta">Single &mdash; Released June 2024</p>
-                        <p class="game-meta">Artist: Piyoverse Entertainment</p>
-                        <p class="game-meta">Genre: Electronic</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://piyoverse.bandcamp.com/track/astro-dreams-2" data-bandcamp-popup="https://piyoverse.bandcamp.com/track/astro-dreams-2" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
+    <div class="game" data-game-id="starcrest2">
+        <h4>スタークレスト2</h4>
+        <p class="game-desc"></p>
+        <p class="game-meta"><strong>発売日:</strong> TBD<br><strong>プラットフォーム:</strong> メガドライブ<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー</p>
+    </div>
 
-        <hr class="section-separator">
-        <section>
-            <h2 class="games-section-title section-large">Featured Music</h2>
-            <div class="game-grid">
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/I'd Let You Drown Me If It Means We Drown Together.jpg" alt="I'd Let You Drown Me If It Means We Drown Together">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">I'd Let You Drown Me If It Means We Drown Together</h3>
-                        <p class="game-meta">Single &mdash; Released July 2021</p>
-                        <p class="game-meta">Artist: BoKKo</p>
-                        <p class="game-meta">Genre: Bedroom Pop</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://bokko.bandcamp.com/track/id-let-you-drown-me-if-it-means-we-drown-together" data-bandcamp-popup="https://bokko.bandcamp.com/track/id-let-you-drown-me-if-it-means-we-drown-together" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/I CAN'T DO IT ANYMORE.jpg" alt="I CAN'T DO IT ANYMORE">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">I CAN'T DO IT ANYMORE</h3>
-                        <p class="game-meta">Album &mdash; Released April 2025</p>
-                        <p class="game-meta">Artist: BoKKo</p>
-                        <p class="game-meta">Genre: Bedroom Pop</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://bokko.bandcamp.com/album/i-cant-do-it-anymore" data-bandcamp-popup="https://bokko.bandcamp.com/album/i-cant-do-it-anymore" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/What I never learned in school.jpg" alt="What I never learned in school">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">What I never learned in school</h3>
-                        <p class="game-meta">Album &mdash; Released October 2022</p>
-                        <p class="game-meta">Artist: BoKKo</p>
-                        <p class="game-meta">Genre: Bedroom Pop</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://bokko.bandcamp.com/album/what-i-never-learned-in-school" data-bandcamp-popup="https://bokko.bandcamp.com/album/what-i-never-learned-in-school" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/Bump In The Night.jpg" alt="Bump In The Night">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">Bump In The Night</h3>
-                        <p class="game-meta">Album &mdash; Released April 2022</p>
-                        <p class="game-meta">Artist: BoKKo</p>
-                        <p class="game-meta">Genre: Bedroom Pop</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://bokko.bandcamp.com/album/bump-in-the-night" data-bandcamp-popup="https://bokko.bandcamp.com/album/bump-in-the-night" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="game-card">
-                    <figure class="game-thumb">
-                        <img src="/Images/What Goes Down The Drain.jpg" alt="What Goes Down The Drain">
-                    </figure>
-                    <div class="game-info">
-                        <h3 class="game-title">What Goes Down The Drain</h3>
-                        <p class="game-meta">Album &mdash; Released August 2021</p>
-                        <p class="game-meta">Artist: BoKKo</p>
-                        <p class="game-meta">Genre: Bedroom Pop</p>
-                        <div class="game-actions">
-                            <a class="btn" href="https://bokko.bandcamp.com/album/what-goes-down-the-drain" data-bandcamp-popup="https://bokko.bandcamp.com/album/what-goes-down-the-drain" data-no-spa>Purchase</a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
-    </main>
+    <div class="game" data-game-id="starcrest-saga">
+        <h4>スタークレストサーガ</h4>
+        <p class="game-desc">アリアと失われた星たちからスタークレスト2まで、全てのスタークレストゲームを収録しています。</p>
+        <p class="game-meta"><strong>発売日:</strong> TBD<br><strong>プラットフォーム:</strong> Steam/Windows<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー</p>
+        <p>Steamでウィッシュリスト登録:  <a href="https://store.steampowered.com/app/3063280/Starcrest/" target="_blank">スタークレストサーガ</a></p>
+    </div>
+</div>
+</div>
 
-    <footer class="site-footer">
-        <div class="social-bar" role="navigation" aria-label="Social links">
-            <div class="social-item"><a class="social-link social-youtube" href="#" aria-label="YouTube"></a><div class="social-label" data-i18n="social-youtube">YouTube</div></div>
-            <div class="social-item"><a class="social-link social-discord" href="#" aria-label="Discord"></a><div class="social-label" data-i18n="social-discord">Discord</div></div>
-            <div class="social-item"><a class="social-link social-bsky" href="#" aria-label="Bluesky"></a><div class="social-label" data-i18n="social-bsky">Bluesky</div></div>
-            <div class="social-item"><a class="social-link social-twt" href="#" aria-label="Twitter"></a><div class="social-label" data-i18n="social-twt">Twitter</div></div>
-        </div>
-        <hr class="footer-divider" />
-        <p data-i18n="footer-copy">&copy; 2025 Piyoverse Entertainment. All rights reserved.</p>
-        <p class="legal-note" data-i18n="legal-note">STARCREST, STARCREST ADVENTURE, ALIA, the PVE logo, the STARCREST logo, Ice Cream UI & Ice Cream Mini, and all affiliated logos, characters, and distinctive marks are trademarks and/or registered trademarks of Piyoverse Entertainment. All rights reserved.</p>
-    </footer>
+<!-- Music -->
+<div class="section">
+<h2 id="musicTitle">音楽</h2>
+<p style="text-align:center;">
+ピヨバースエンターテインメント公式リリースをBandcampで聴くことができます。<br><br>
+<a href="https://piyoverse.bandcamp.com/" target="_blank">https://piyoverse.bandcamp.com/</a>
+</p>
+</div>
 
-    <script src="/ie-fixes.js" defer></script>
-    <script src="/market-audio.js" defer></script>
-    <script src="/pwa.js" defer></script>
-    <script src="/bandcamp-popup.js" defer></script>
-    <script src="/anti-inspect.js" defer></script>
-    <script src="/spa.js" defer></script>
+<div class="footer">
+<span id="contactLabel">お問い合わせ:</span> <a id="contactLink" href="mailto:contact@piyoverse.net">contact@piyoverse.net</a> ・ <span id="employeeLabel">For employees only:</span> <span id="employeesText">Piyoverse Network — アクセスについては創業者へお問い合わせください。</span>
+</div>
+
+<div class="legal" style="text-align:center; font-size:0.8em; margin-top:10px;">
+<p id="footerNotice">このサイトを通じたサービスや製品の勧誘はご遠慮ください。協業のご提案については当社の窓口へご連絡ください。</p>
+<p id="footerLegal" style="font-size:0.7em; opacity:0.9;">© Piyoverse Entertainment. All rights reserved. Alia and the Lost Stars™, Starcrest™, Piyoverse™, Piyoverse Network™ are trademarks or registered trademarks of Piyoverse Entertainment.</p>
+</div>
+
+<!-- Employees page (hidden by default) -->
+<div class="panel" id="employeesPage" style="display:none; max-width:800px; margin-top:20px;">
+    <button id="employeesBack" style="position:absolute; top:12px; left:12px;">← Back</button>
+    <h1 id="employeesTitle">Piyoverse Network</h1>
+    <p id="employeesIntro">Piyoverse Network is an internal messaging platform available exclusively to Piyoverse Entertainment employees. Access is granted only by direct invitation from the founders; please contact them individually to request access.</p>
+</div>
+
+</div>
+
+<script>
+// ヘルパー: #rrggbb または #rgb を {r,g,b} に変換する
+function 十六進数をRGBに(hex) {
+    if(!hex) return null;
+    hex = hex.replace('#','');
+    if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+    const 数値 = parseInt(hex,16);
+    return { r: (数値>>16)&255, g: (数値>>8)&255, b: 数値&255 };
+}
+
+// 初期: CSS/スクリプトの保存された設定を適用
+const _mainStylesEl = document.getElementById('mainStyles');
+const _savedCSS = localStorage.getItem('cssEnabled');
+const _savedScripts = localStorage.getItem('scriptsEnabled');
+const _cssEnabledInitial = _savedCSS === null ? true : _savedCSS === 'true';
+const _scriptsEnabledInitial = _savedScripts === null ? true : _savedScripts === 'true';
+if(_mainStylesEl) _mainStylesEl.disabled = !_cssEnabledInitial;
+window.スクリプト有効 = _scriptsEnabledInitial;
+const _savedDark = localStorage.getItem('darkMode');
+const _darkInitial = _savedDark === null ? false : _savedDark === 'true';
+const _darkToggleEl = document.getElementById('darkToggle');
+if(_darkToggleEl) _darkToggleEl.checked = _darkInitial;
+
+// 色操作ヘルパー: 十六進RGB -> 16進表記
+function RGBを十六進数に(rgb){
+    if(!rgb) return null;
+    const toHex = v => Math.max(0, Math.min(255, v)).toString(16).padStart(2,'0');
+    return `#${toHex(rgb.r)}${toHex(rgb.g)}${toHex(rgb.b)}`;
+}
+
+// 暗色化ヘルパー: 指定比率で暗くする
+function 暗くする(hex, factor){
+    const c = 十六進数をRGBに(hex);
+    if(!c) return hex;
+    const r = Math.round(c.r * factor);
+    const g = Math.round(c.g * factor);
+    const b = Math.round(c.b * factor);
+    return RGBを十六進数に({r,g,b});
+}
+
+// テーマからダーク変換を作る（簡易）
+function ダーク変換(src){
+    return {
+        panel: 暗くする(src.panel || src.background, 0.22),
+        text: '#f6f6f6',
+        game: 暗くする(src.game || src.panel || src.background, 0.28),
+        background: 暗くする(src.background, 0.12),
+        secondary: 暗くする(src.secondary || src.background, 0.14)
+    };
+}
+
+// --- Alia sprite handling: embedded defaults + optional overrides via localStorage ---
+// If you want to hard-code the raw image data into this HTML file,
+// paste the full data URL (e.g. `data:image/png;base64,AAAA...`) into the
+// corresponding constant below. If a constant is non-empty it will be used
+// instead of localStorage or the built-in defaults.
+const EMBED_ALIA_IDLE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgCAYAAAAbifjMAAABqUlEQVRIib1VUY7FIAicaXpE8ZDgGct+KBZ97dtkP5bEaJVBGMAC/yEknaT/Gfz1/B0oH0B3+9A/nm5cwTWdmZO2GOYOBsoCehN34eLBM1jH2EURnpwrOEB1zO0BvO6dbndMR43bFFpuxZowWu49k5EhE7qQbtIJJGWs+8j7sbcQTdLdLCl2JTdzUuYc5/ENAGcsbve7m2V+d1IvrX2dwiHFiVk0DTeRAXiXoyrcjfzMwi1hpNY+q2oiu8HdOQtpr/k1jHxzN+Y+vN8VsqECoKa0ZeDUf4rPhR7INkgsUEAbaP7agBPsJn3sYuIuv7wLUVRCfuCj2N5vN5sF9SpmzwbCxbjh3UAPbSFxWtUKmjNIPGYt9e68FIA2YKSXIjyyS7NK9QIAXJeOUXBduuqMiw8AaKlsp3vl4SEpijKMZwyCuG+xm1migZPMI2JBVWRyZlitzV64HblmKOdjSgYQo4F2A1mWsrQtx9F9SB0ZItJf5XMHTG60QVLdK9rsj9yk239B/H7WdfkTfTsDNvbNzGV7H4RcMhGETytu45XVu1Ry6y5dOEKhGH8Aj0O6SJ95sR4AAAAASUVORK5CYII="; // alia idle
+const EMBED_ALIA_FALL = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgCAYAAAAbifjMAAABrUlEQVRIibVV2Y4tIQisMucThY8Ev/EwD27Yy9zkJkNiWpRC9gb+mkgGyfhv8D9lnoFyA0b4o2y5vniCNd15kH5TzAwG6gF6owhZuPIOtrGuZMiWfDZ4gnR82wP4fla+Zvja+bLVBquA1VM4n7mMDLkwhAyXHkBSxr6vfD7PjkCTjHBPgl0o3NeaSjOfglhR1KBtm/m1Hryi/fs1RVVbPFKtlB2c7py27Pg1pZufhVUyeJm1Xh4w1cX3u50N4qHmrQJV7zVQhqKI4KEgB3TuKwAdhs34ZOBNgQujIqEAtOFznRVpDfS7Esz0CHtNPJJ7hEvae8pCrQAMWgF/MHMHp6FpOR7uXGsA9JKLC9Xzto3y/0xT8NI+mab/Do2qBoqwZG0AEMJAU5QyV0MpCrQtIx6k7JmA2QvoqdrBOoJ4H3N4mokR8esgJXlgjpn4BJ5l/CazFLjfB2Zr7fg+yZYr6Ap+4ycd/lytMDO4O0UksiuSM5BJRCK8j6+Qs0NjTKy3bHRzKEF6+OiLQzkZ7v3nkkfaMuWI7qj33HnLIvumB8nP4malvbTsPAstkVv+B03BUI72kMXcAAAAAElFTkSuQmCC"; // alia fall
+const EMBED_ALIA_HURT = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAgCAYAAAAbifjMAAABsElEQVRIib1VSZLEIAyTqH4i5pGYN7bmAASTkDnMYVxFhcXybgf4DyIpkvoz+Nf3d6A9gJI/+NNJ4w4u4c1F+iaYdzCQN9AbScbNgjO4jnWnimnJZwdPUBnfdgDvdx/58imVqa2i5sVYAqbmdec2MuRGGSm3HkDSxr6v830INEnJPTB2JrmLtOs7wfM8sDFlDUBGzQ15uJMK8A1xTGUGuftCXEXTsAIJfOvKRhmgWmsQVCE5U9QcaQX0Sf2tLQtwqPmacbmxg7s1kohTL0RBGUAJaYvAi39u3KiMgADQRlXmWY21ga5nA8pdcpex18OR3CW3sO8F2IOYM4CKkgHXQcMVmIZW0qa4n1oDUG55uFHeX9tI89YLp9aJNP13FOVSQbNeBy0UjYxCK0hproaUCtAWj7lIs+Xq7AP0NK1gbUF8jjic6kDS70OU3DDbTDyBS9nH253nEuDuD3BrbfueeB9T+Q5+O0/a/LlbUWuFu9PMFF2xmIFIZiZ5H12yvTs1ptVbNro5NJEuH32xCSfl3n8scYpdpmzRHfUeO++yqH6DQvJznWalvbTsvFNJii3/A5R6SVAKBJTFAAAAAElFTkSuQmCC"; // alia hurt
+const EMBED_ALIA1 = ""; // set to data:image/png;base64,... to embed Alia listing background
+const EMBED_STARCREST2 = ""; // set to data:image/png;base64,... to embed Starcrest 2 listing background
+const EMBED_STARCRESTSAGA = ""; // set to data:image/png;base64,... to embed Starcrest Saga listing background
+// (optional) If you have a riayah data-URL you can paste it here to embed the background directly.
+const EMBED_RIAYAH = ""; // set to data:image/png;base64,... to embed
+
+const _defaultSprites = {
+    idle: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="48" height="48" fill="%23ffe4f0"/><circle cx="24" cy="20" r="10" fill="%23ff69b4"/></svg>',
+    fall: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="48" height="48" fill="%23fff4e6"/><rect x="8" y="18" width="32" height="18" fill="%23ffa500"/></svg>',
+    hurt: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="48" height="48" fill="%23ffeef0"/><polygon points="8,40 24,12 40,40" fill="%23c71540"/></svg>'
+};
+
+function 選ぶスプライト(){
+    // Priority: embedded constant > localStorage override > default built-in
+    const idle = (typeof EMBED_ALIA_IDLE !== 'undefined' && EMBED_ALIA_IDLE) ? EMBED_ALIA_IDLE : (localStorage.getItem('alia_idle') || _defaultSprites.idle);
+    const fall = (typeof EMBED_ALIA_FALL !== 'undefined' && EMBED_ALIA_FALL) ? EMBED_ALIA_FALL : (localStorage.getItem('alia_fall') || _defaultSprites.fall);
+    const hurt = (typeof EMBED_ALIA_HURT !== 'undefined' && EMBED_ALIA_HURT) ? EMBED_ALIA_HURT : (localStorage.getItem('alia_hurt') || _defaultSprites.hurt);
+    const arr = [idle, fall, hurt];
+    const idx = Math.floor(Math.random()*arr.length);
+    return arr[idx];
+}
+
+function 表示スプライト(){
+    try{
+        const el = document.getElementById('panelSprite');
+        if(!el) return;
+        // If scripts disabled, do not change sprite
+        if(window.スクリプト有効 === false) return;
+        el.src = 選ぶスプライト();
+    }catch(e){ console.warn('sprite set failed', e); }
+}
+
+// set sprite on initial run
+表示スプライト();
+
+// Crop top 16px of the "fall" sprite and set as favicon (16x16)
+function 裁断してファビコンに設定(){
+    if(window.スクリプト有効 === false) return;
+    try{
+        const src = (typeof EMBED_ALIA_FALL !== 'undefined' && EMBED_ALIA_FALL) ? EMBED_ALIA_FALL : (localStorage.getItem('alia_fall') || _defaultSprites.fall);
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function(){
+            const w = img.naturalWidth || img.width || 32;
+            const h = img.naturalHeight || img.height || 32;
+            const cropH = Math.min(16, h);
+            // First draw the top slice into a temporary canvas
+            const slice = document.createElement('canvas');
+            slice.width = w;
+            slice.height = cropH;
+            const sctx = slice.getContext('2d');
+            sctx.drawImage(img, 0, 0, w, cropH, 0, 0, w, cropH);
+
+            // Resize to 16x16 for favicon (preserves the top slice content)
+            const icon = document.createElement('canvas');
+            icon.width = 16; icon.height = 16;
+            const ictx = icon.getContext('2d');
+            // Use nearest-neighbor scaling for pixel art look
+            try{ ictx.imageSmoothingEnabled = false; }catch(e){}
+            ictx.drawImage(slice, 0, 0, slice.width, slice.height, 0, 0, 16, 16);
+            const dataURL = icon.toDataURL('image/png');
+            let link = document.querySelector("link[rel~='icon']");
+            if(!link){ link = document.createElement('link'); link.rel = 'icon'; document.getElementsByTagName('head')[0].appendChild(link); }
+            link.href = dataURL;
+        };
+        img.onerror = function(e){ console.warn('favicon image load error', e); };
+        img.src = src;
+    }catch(e){ console.warn('favicon set failed', e); }
+}
+
+// apply favicon from Alia fall image
+裁断してファビコンに設定();
+
+// Apply Alia1 translucent background to the main Alia .game listing
+function 表示アリア背景(){
+    if(window.スクリプト有効 === false) return;
+    const target = document.querySelector('.game[data-game-id="alia"]');
+    if(!target) return;
+
+    const tryLocalTxt = async (path)=>{
+        try{
+            const r = await fetch(path);
+            if(!r.ok) return null;
+            const txt = await r.text();
+            if(txt && txt.startsWith('data:image')) return txt;
+        }catch(e){/*ignore*/}
+        return null;
+    };
+
+    (async ()=>{
+        let data = (typeof EMBED_ALIA1 !== 'undefined' && EMBED_ALIA1) ? EMBED_ALIA1 : null;
+        if(!data){
+            data = await tryLocalTxt('./piyoverse_sprites/alia1.txt') || await tryLocalTxt('./alia1_lines.txt');
+        }
+        if(!data){
+            data = '"Starcrest/Starcrest Master System/alia1.png"';
+        }
+        target.style.setProperty('--alia1', `url(${data})`);
+        target.classList.add('bg-alia1');
+    })();
+}
+
+// apply Alia1 background now
+表示アリア背景();
+
+// Apply Starcrest2 translucent background to the Starcrest 2 .game listing
+function 表示スタークレスト2背景(){
+    if(window.スクリプト有効 === false) return;
+    const target = document.querySelector('.game[data-game-id="starcrest2"]');
+    if(!target) return;
+
+    const tryLocalTxt = async (path)=>{
+        try{
+            const r = await fetch(path);
+            if(!r.ok) return null;
+            const txt = await r.text();
+            if(txt && txt.startsWith('data:image')) return txt;
+        }catch(e){/*ignore*/}
+        return null;
+    };
+
+    (async ()=>{
+        let data = (typeof EMBED_STARCREST2 !== 'undefined' && EMBED_STARCREST2) ? EMBED_STARCREST2 : null;
+        if(!data){
+            data = await tryLocalTxt('./piyoverse_sprites/starcrest2.txt') || await tryLocalTxt('./starcrest2_lines.txt');
+        }
+        if(!data){
+            data = '"Starcrest/Starcrest Master System/starcrest2.png"';
+        }
+        target.style.setProperty('--starcrest2', `url(${data})`);
+        target.classList.add('bg-starcrest2');
+    })();
+}
+
+// apply Starcrest 2 background now
+表示スタークレスト2背景();
+
+// Apply StarcrestSaga translucent background to the Starcrest Saga .game listing
+function 表示スタークレストサーガ背景(){
+    if(window.スクリプト有効 === false) return;
+    const target = document.querySelector('.game[data-game-id="starcrest-saga"]');
+    if(!target) return;
+
+    const tryLocalTxt = async (path)=>{
+        try{
+            const r = await fetch(path);
+            if(!r.ok) return null;
+            const txt = await r.text();
+            if(txt && txt.startsWith('data:image')) return txt;
+        }catch(e){/*ignore*/}
+        return null;
+    };
+
+    (async ()=>{
+        let data = (typeof EMBED_STARCRESTSAGA !== 'undefined' && EMBED_STARCRESTSAGA) ? EMBED_STARCRESTSAGA : null;
+        if(!data){
+            data = await tryLocalTxt('./piyoverse_sprites/starcrestsaga.txt') || await tryLocalTxt('./starcrestsaga_lines.txt');
+        }
+        if(!data){
+            data = `"Starcrest/Starcrest Master System/starcrestsaga.png?v=${Date.now()}"`;
+        }
+        target.style.setProperty('--starcrestsaga', `url(${data})`);
+        target.classList.add('bg-starcrestsaga');
+    })();
+}
+
+// apply Starcrest Saga background now
+表示スタークレストサーガ背景();
+
+// Apply Riayah translucent background to the Starcrest 1 .game listing
+function 表示リアイヤ背景(){
+    if(window.スクリプト有効 === false) return;
+    const target = document.querySelector('.game[data-game-id="starcrest1"]');
+    if(!target) return;
+    // Priority: embedded constant > extracted text file > local image file
+    const tryLocalTxt = async (path)=>{
+        try{
+            const r = await fetch(path);
+            if(!r.ok) return null;
+            const txt = await r.text();
+            if(txt && txt.startsWith('data:image')) return txt;
+        }catch(e){/*ignore*/}
+        return null;
+    };
+
+    (async ()=>{
+        let data = (typeof EMBED_RIAYAH !== 'undefined' && EMBED_RIAYAH) ? EMBED_RIAYAH : null;
+        if(!data){
+            // try extracted file we created earlier, or an updated riayah_lines.txt placed next to this HTML
+            data = await tryLocalTxt('./piyoverse_sprites/riayah.txt') || await tryLocalTxt('./riayah_lines.txt');
+        }
+        if(!data){
+            // fallback to original image path (relative to this HTML file in Downloads)
+            // path contains spaces so wrap in quotes for CSS url(...)
+            data = '"Starcrest/Starcrest Master System/riayah.png"';
+        }
+        // set as CSS var on element and enable class
+        target.style.setProperty('--riayah', `url(${data})`);
+        target.classList.add('bg-riayah');
+    })();
+}
+
+// apply Riayah background now and after settings are applied
+表示リアイヤ背景();
+
+    // 設定トグル
+const 設定ボタン = document.getElementById('settingsBtn');
+const 設定パネル = document.getElementById('settingsPanel');
+設定ボタン.addEventListener('click', () => {
+    設定パネル.style.display = 設定パネル.style.display === 'block' ? 'none' : 'block';
+});
+
+// テーマ一覧
+const テーマ群 = {
+    blueberry: {panel:'#e0e0ff', text:'#2e2e8c', game:'#d0d0ff', background:'#e8e8ff', secondary:'#ffffff'},
+    juicy: {panel:'#f6f9ff', text:'#062a6b', game:'#e6f0ff', background:'#072b7a', secondary:'#bfe1ff'},
+    strawberry: {panel:'#fff0f4', text:'#7a1840', game:'#ffdfe8', background:'#ffe9f1', secondary:'#ffffff'},
+    raspberry: {panel:'#ffe4e6', text:'#c71540', game:'#ffd0d5', background:'#ffe4e6', secondary:'#ffffff'},
+    chocolate: {panel:'#d2b48c', text:'#4b2e2e', game:'#cfa98b', background:'#e6cfc2', secondary:'#ffffff'},
+    lemonade: {panel:'#fffacd', text:'#a87c00', game:'#fff8b0', background:'#fffacd', secondary:'#ffffff'},
+    keylime: {panel:'#d0f0c0', text:'#2e5e2e', game:'#b8e6a0', background:'#e0f8d8', secondary:'#ffffff'},
+    plum: {panel:'#dda0dd', text:'#5c2e5c', game:'#e3a0e3', background:'#eec6ee', secondary:'#ffffff'},
+    vanilla: {panel:'#fff8e7', text:'#5a4b3c', game:'#fff2d9', background:'#fff8e7', secondary:'#ffffff'},
+    licorice: {panel:'#333333', text:'#f0f0f0', game:'#555555', background:'#222222', secondary:'#555555',
+        light: {panel:'#f9f9f9', text:'#111111', game:'#f0f0f0', background:'#ffffff', secondary:'#f5f5f5'}
+    },
+    cherry: {panel:'#ffd0d0', text:'#a83232', game:'#ffc0c0', background:'#ffe0e0', secondary:'#ffffff'}
+};
+
+// 背景パターン一覧
+const パターン群 = {stripes:'stripes', polka:'polka', solid:'solid'};
+
+function 適用設定(){
+    let テーマ = localStorage.getItem('theme') || 'raspberry';
+    let パターン = localStorage.getItem('pattern') || 'stripes';
+    let 言語 = localStorage.getItem('language') || 'ja';
+
+    // スクリプト無効時は早期に処理を停止（既に CSS の適用は初期化済み）
+    if(window.スクリプト有効 === false){
+        // still reflect selector states from storage so UI matches
+        const cssState = localStorage.getItem('cssEnabled');
+        const scriptsState = localStorage.getItem('scriptsEnabled');
+        const CSS入力 = document.getElementById('cssToggle'); if(CSS入力) CSS入力.checked = cssState === null ? true : cssState === 'true';
+        const SCRIPT入力 = document.getElementById('scriptToggle'); if(SCRIPT入力) SCRIPT入力.checked = scriptsState === null ? true : scriptsState === 'true';
+        return;
+    }
+
+    // localStorage の古い/欠落値をデフォルトに戻す
+    if(!テーマ群[テーマ]){
+        const フォールバック = 'raspberry';
+        console.warn('Stored theme not found, falling back to', フォールバック);
+        テーマ = フォールバック;
+        localStorage.setItem('theme', フォールバック);
+    }
+    if(!パターン群[パターン]){
+        const フォールバックP = 'stripes';
+        console.warn('Stored pattern not found, falling back to', フォールバックP);
+        パターン = フォールバックP;
+        localStorage.setItem('pattern', フォールバックP);
+    }
+    if(!(言語 === 'ja' || 言語 === 'en')){
+        const フォールバックL = 'ja';
+        console.warn('Stored language not recognized, falling back to', フォールバックL);
+        言語 = フォールバックL;
+        localStorage.setItem('language', フォールバックL);
+    }
+
+    const 元テーマ = テーマ群[テーマ];
+    const ダーク保存 = localStorage.getItem('darkMode');
+    const ダーク = ダーク保存 === null ? _darkInitial : ダーク保存 === 'true';
+    const ダーク入力 = document.getElementById('darkToggle'); if(ダーク入力) ダーク入力.checked = ダーク;
+    let 色 = 元テーマ;
+    if(ダーク){
+        if(元テーマ.dark) 色 = 元テーマ.dark;
+        else 色 = ダーク変換(元テーマ);
+    } else {
+        if(元テーマ.light) 色 = 元テーマ.light;
+        else 色 = 元テーマ;
+    }
+    const メインパネル = document.getElementById('mainPanel');
+    const 設定パネル要素 = document.getElementById('settingsPanel');
+    const 設定ボタン要素 = document.getElementById('settingsBtn');
+
+    // すべてのパネルをテーマに合わせてスタイル設定
+    document.querySelectorAll('.panel').forEach(p => {
+        p.style.backgroundColor = 色.panel;
+        p.style.color = 色.text;
+    });
+    // 従業員ページも同様にスタイルし、表示時に一致させる
+    const 従業員ページ要素 = document.getElementById('employeesPage');
+    if(従業員ページ要素){ 従業員ページ要素.style.backgroundColor = 色.panel; 従業員ページ要素.style.color = 色.text; }
+
+    document.querySelectorAll('.game').forEach(g => g.style.backgroundColor = 色.game);
+    document.body.style.setProperty('--bg-color', 色.background);
+    document.body.style.setProperty('--bg-secondary', 色.secondary || '#ffffff');
+    // 見出しや全体テキストがテーマ色に従うようパネルのテキスト色を公開
+    document.body.style.setProperty('--panel-text', 色.text);
+    document.body.style.color = 色.text;
+
+    // ユーザーが 'abstract' テーマを選択した場合（抽象的な背景を適用）
+    // インライン背景の上書きをクリア。以下のパターン処理で置き換わる可能性あり。
+    document.body.style.background = '';
+    document.body.style.backgroundBlendMode = '';
+    document.body.style.backgroundAttachment = '';
+
+    // アウトライン色はテーマのテキスト色から算出（色相/コントラストを優先）
+    // 'licorice' テーマは黒のアウトラインを使用する特別扱い
+    const アウトライン元Hex = 色.text || 色.background;
+    const アウトラインRGB = 十六進数をRGBに(アウトライン元Hex);
+    if(テーマ === 'licorice'){
+        document.body.style.setProperty('--panel-dark-strong', 'rgb(0,0,0)');
+        document.body.style.setProperty('--panel-dark-mid', 'rgba(0,0,0,0.36)');
+        document.body.style.setProperty('--panel-dark-transparent', 'rgba(0,0,0,0)');
+    } else if(アウトラインRGB){
+        const {r:赤,g:緑,b:青} = アウトラインRGB;
+        const 輝度 = 0.2126*赤 + 0.7152*緑 + 0.0722*青;
+        let 暗R, 暗G, 暗B;
+        if(輝度 > 180){
+            // 非常に明るいテキスト色（稀）: コントラストのためほどほどに暗くする
+            const 係数 = 0.45;
+            暗R = Math.max(24, Math.round(赤 * 係数));
+            暗G = Math.max(24, Math.round(緑 * 係数));
+            暗B = Math.max(24, Math.round(青 * 係数));
+        } else if(輝度 > 100){
+            // 中間輝度: 色相を保ちつつ少し暗くする
+            const 係数 = 0.6;
+            暗R = Math.max(18, Math.round(赤 * 係数));
+            暗G = Math.max(18, Math.round(緑 * 係数));
+            暗B = Math.max(18, Math.round(青 * 係数));
+        } else {
+            // 暗いテキスト: 暗いパネルに対して見やすくするため少し明るくする
+            const ブレンド = 0.22;
+            暗R = Math.min(255, Math.round(赤 + (255 - 赤) * ブレンド));
+            暗G = Math.min(255, Math.round(緑 + (255 - 緑) * ブレンド));
+            暗B = Math.min(255, Math.round(青 + (255 - 青) * ブレンド));
+        }
+        document.body.style.setProperty('--panel-dark-strong', `rgb(${暗R}, ${暗G}, ${暗B})`);
+        document.body.style.setProperty('--panel-dark-mid', `rgba(${暗R}, ${暗G}, ${暗B}, 0.36)`);
+        document.body.style.setProperty('--panel-dark-transparent', `rgba(${暗R}, ${暗G}, ${暗B}, 0)`);
+    } else {
+        document.body.style.setProperty('--panel-dark-strong', 'rgb(0,0,0)');
+        document.body.style.setProperty('--panel-dark-mid', 'rgba(0,0,0,0.36)');
+        document.body.style.setProperty('--panel-dark-transparent', 'rgba(0,0,0,0)');
+    }
+
+    // 設定 UI を選択されたテーマに合わせる
+    if(設定パネル要素){
+        設定パネル要素.style.backgroundColor = 色.panel;
+        設定パネル要素.style.color = 色.text;
+        設定パネル要素.style.borderColor = 色.text;
+    }
+    if(設定ボタン要素){
+        設定ボタン要素.style.backgroundColor = 色.panel;
+        設定ボタン要素.style.color = 色.text;
+        設定ボタン要素.style.border = '1px solid ' + 色.text;
+    }
+
+    // 既知のパターンクラスをすべて削除し、選択されたものを追加
+    document.body.classList.remove('stripes','polka','solid');
+    document.body.classList.add(パターン);
+
+    // 選択されたパターンが確実に適用されるようインライン背景を設定
+    if(パターン === 'stripes'){
+        // Explicitly set the stripes background inline to avoid being overridden.
+        const 縞背景 = `repeating-linear-gradient(45deg, ${色.background} 0, ${色.background} 120px, ${色.secondary || '#ffffff'} 120px, ${色.secondary || '#ffffff'} 240px)`;
+        document.body.style.background = 縞背景;
+        document.documentElement.style.background = 縞背景;
+        document.body.style.backgroundAttachment = 'fixed';
+        document.documentElement.style.backgroundAttachment = 'fixed';
+        document.body.style.backgroundRepeat = 'repeat';
+        document.documentElement.style.backgroundRepeat = 'repeat';
+
+    } else if(パターン === 'solid'){
+        document.body.style.background = 色.background;
+        document.documentElement.style.background = 色.background;
+        document.body.style.backgroundAttachment = 'fixed';
+        document.documentElement.style.backgroundAttachment = 'fixed';
+
+    } else if(パターン === 'polka'){
+        // polka uses a ::before overlay; clear inline background so the body's bg-color/secondary is used
+        document.body.style.background = '';
+        document.documentElement.style.background = '';
+
+    } else {
+        // default: clear inline background
+        document.body.style.background = '';
+        document.documentElement.style.background = '';
+    }
+
+    // 言語
+    if(言語==='en'){
+        document.getElementById('headerTitle').innerText = "Welcome to Piyoverse Entertainment! (≧◡≦)";
+        document.getElementById('introText').innerText = "Piyoverse Entertainment is a global corporation that dedicates resources towards action-packed games and stunning music compositions.";
+        document.getElementById('gamesTitle').innerText = "Games";
+        document.getElementById('musicTitle').innerText = "Music";
+        const 今後 = document.getElementById('upcomingTitle'); if(今後) 今後.innerText = 'Upcoming Games';
+
+        document.querySelectorAll('.game').forEach(g=>{
+            const ゲームID = g.dataset.gameId || '';
+            if(ゲームID==='alia'){
+                const 段落群 = g.querySelectorAll('p');
+                g.querySelector('h3').innerText = 'Alia and the Lost Stars';
+                if(段落群[0]) 段落群[0].innerText =
+                    "One night, young Alia went to bed wishing for a good sleep… but fell into a deep coma and wandered into the dream world. " +
+                    "During her journey, she meets Saria, a girl who has long been in the dream world. " +
+                    "To return home, she must collect all the scattered stars. " +
+                    "Beware, the Vortex has invaded this world, and the Vortex Queen waits at the end. " +
+                    "The dream world is filled with traps, so watch your step.";
+                if(段落群[1]) 段落群[1].innerHTML = '<strong>Release Date:</strong> 2026/02/21<br><strong>Platform:</strong> SG-1000<br><strong>Developer:</strong> Piyoverse Entertainment<br><strong>Players:</strong> 1<br><strong>Genre:</strong> Platformer';
+                if(段落群[2]) 段落群[2].innerHTML = 'Buy here: <a href="https://stardusteri.itch.io/alia-and-the-lost-stars" target="_blank">Alia and the Lost Stars</a>';
+            } else if(ゲームID==='starcrest1'){
+                g.querySelector('h4').innerText = 'Starcrest';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = '';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>Release Date:</strong> TBA<br><strong>Platform:</strong> Mark III<br><strong>Developer:</strong> Piyoverse Entertainment<br><strong>Players:</strong> 1<br><strong>Genre:</strong> Action/Adventure';
+            } else if(ゲームID==='starcrest2'){
+                g.querySelector('h4').innerText = 'Starcrest 2';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = '';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>Release Date:</strong> TBD<br><strong>Platform:</strong> Mega Drive<br><strong>Developer:</strong> Piyoverse Entertainment<br><strong>Players:</strong> 1<br><strong>Genre:</strong> Action/Adventure';
+            } else if(ゲームID==='starcrest-saga'){
+                g.querySelector('h4').innerText = 'Starcrest Saga';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = 'Includes all Starcrest games from Alia and the Lost Stars through Starcrest 2.';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>Release Date:</strong> TBD<br><strong>Platform:</strong> Steam/Windows<br><strong>Developer:</strong> Piyoverse Entertainment<br><strong>Players:</strong> 1<br><strong>Genre:</strong> Action/Adventure';
+                const 段落群 = g.querySelectorAll('p');
+                if(段落群[2]) 段落群[2].innerHTML = 'Wishlist on Steam: <a href="https://store.steampowered.com/app/3063280/Starcrest/" target="_blank">Starcrest Saga</a>';
+            }
+        });
+
+        // 音楽セクション
+        const 音楽段落 = document.getElementById('musicTitle')?.nextElementSibling; if(音楽段落) 音楽段落.innerHTML = 'Listen to official releases on Bandcamp.<br><br><a href="https://piyoverse.bandcamp.com/" target="_blank">https://piyoverse.bandcamp.com/</a>';
+
+        // フッター
+        const フッタ注意 = document.getElementById('footerNotice'); if(フッタ注意) フッタ注意.innerText = 'Solicitations for services or products are not permitted; please direct collaboration proposals to our official channels.';
+        const フッタ法務 = document.getElementById('footerLegal'); if(フッタ法務) フッタ法務.innerText = '© Piyoverse Entertainment. All rights reserved. Alia and the Lost Stars™ , Starcrest™ , Piyoverse™ , Piyoverse Network™ are trademarks or registered trademarks of Piyoverse Entertainment.';
+        const 連絡ラベル = document.getElementById('contactLabel'); if(連絡ラベル) 連絡ラベル.innerText = 'Contact:';
+        const 従業員ラベル = document.getElementById('employeeLabel'); if(従業員ラベル) 従業員ラベル.innerText = 'For employees only:';
+        const 従業員テキスト = document.getElementById('employeesText'); if(従業員テキスト) 従業員テキスト.innerText = 'Piyoverse Network — request access from the founders.';
+
+        // Employees page
+        const 従業員タイトル = document.getElementById('employeesTitle'); if(従業員タイトル) 従業員タイトル.innerText = 'Piyoverse Network';
+        const 従業員導入 = document.getElementById('employeesIntro'); if(従業員導入) 従業員導入.innerText = 'Piyoverse Network is an internal messaging platform available exclusively to Piyoverse Entertainment employees. Access is granted only by direct invitation from the founders; please contact them individually to request access.';
+    } else {
+        document.getElementById('headerTitle').innerText = "ピヨバースエンターテインメントへようこそ！ (≧◡≦)";
+        document.getElementById('introText').innerText = "ピヨバースエンターテインメントは、アクション満載のゲームと魅力的な音楽作品に注力するグローバル企業です。";
+        document.getElementById('gamesTitle').innerText = "ゲーム";
+        document.getElementById('musicTitle').innerText = "音楽";
+        const 今後 = document.getElementById('upcomingTitle'); if(今後) 今後.innerText = '今後のゲーム';
+
+        document.querySelectorAll('.game').forEach(g=>{
+            const ゲームID = g.dataset.gameId || '';
+            if(ゲームID==='alia'){
+                const 段落群 = g.querySelectorAll('p');
+                g.querySelector('h3').innerText = 'アリアと失われた星たち';
+                if(段落群[0]) 段落群[0].innerText =
+                    "ある夜、若きアリアはぐっすり眠れることを願ってベッドに入りました…しかし、深い昏睡に落ち、夢の世界へ迷い込んでしまいます。 " +
+                    "夢の世界を旅する中で、ずっと夢の中にいる少女サリアに出会います。 " +
+                    "自分の世界に戻るには、散らばった星たちを集めなければなりません。 " +
+                    "ヴォルテックスが夢の世界に侵入しており、最後にはヴォルテックスクイーンが待ち受けています。 " +
+                    "夢の世界にはトラップが仕掛けられているので、足元に注意してください。";
+                if(段落群[1]) 段落群[1].innerHTML = '<strong>発売日:</strong> 2026/02/21<br><strong>プラットフォーム:</strong> SG-1000<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1人<br><strong>ジャンル:</strong> プラットフォーマー';
+                if(段落群[2]) 段落群[2].innerHTML = '購入はこちら: <a href="https://stardusteri.itch.io/alia-and-the-lost-stars" target="_blank">アリアと失われた星たち</a>';
+            } else if(ゲームID==='starcrest1'){
+                g.querySelector('h4').innerText = 'スタークレスト';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = '';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>発売日:</strong> TBA<br><strong>プラットフォーム:</strong> Mark III<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー';
+            } else if(ゲームID==='starcrest2'){
+                g.querySelector('h4').innerText = 'スタークレスト2';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = '';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>発売日:</strong> TBD<br><strong>プラットフォーム:</strong> メガドライブ<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー';
+            } else if(ゲームID==='starcrest-saga'){
+                g.querySelector('h4').innerText = 'スタークレストサーガ';
+                const 説明 = g.querySelector('.game-desc'); if(説明) 説明.innerText = 'アリアと失われた星たちからスタークレスト2まで、全てのスタークレストゲームを収録しています。';
+                const メタ = g.querySelector('.game-meta'); if(メタ) メタ.innerHTML = '<strong>発売日:</strong> TBD<br><strong>プラットフォーム:</strong> Steam/Windows<br><strong>開発:</strong> ピヨバースエンターテインメント<br><strong>プレイヤー:</strong> 1<br><strong>ジャンル:</strong> アクション/アドベンチャー';
+                const 段落群 = g.querySelectorAll('p');
+                if(段落群[2]) 段落群[2].innerHTML = 'Steamでウィッシュリスト登録:  <a href="https://store.steampowered.com/app/3063280/Starcrest/" target="_blank">スタークレストサーガ</a>';
+            }
+        });
+
+        // 音楽セクション
+        const 音楽段落 = document.getElementById('musicTitle')?.nextElementSibling; if(音楽段落) 音楽段落.innerHTML = 'ピヨバースエンターテインメント公式リリースをBandcampで聴くことができます。<br><br><a href="https://piyoverse.bandcamp.com/" target="_blank">https://piyoverse.bandcamp.com/</a>';
+
+        // フッター
+        const フッタ注意 = document.getElementById('footerNotice'); if(フッタ注意) フッタ注意.innerText = 'このサイトを通じたサービスや製品の勧誘はご遠慮ください。協業のご提案は当社の窓口へご連絡ください。';
+        const フッタ法務 = document.getElementById('footerLegal'); if(フッタ法務) フッタ法務.innerText = '© Piyoverse Entertainment. All rights reserved. Alia and the Lost Stars™ , Starcrest™ , Piyoverse™ , Piyoverse Network™ はピヨバースエンターテインメントの商標または登録商標です。';
+        const 連絡ラベル = document.getElementById('contactLabel'); if(連絡ラベル) 連絡ラベル.innerText = 'お問い合わせ:';
+        const 従業員ラベル = document.getElementById('employeeLabel'); if(従業員ラベル) 従業員ラベル.innerText = '従業員専用:';
+        const 従業員テキスト = document.getElementById('employeesText'); if(従業員テキスト) 従業員テキスト.innerText = 'Piyoverse Network — アクセスについては創業者へお問い合わせください。';
+
+        // Employees page
+        const 従業員タイトル = document.getElementById('employeesTitle'); if(従業員タイトル) 従業員タイトル.innerText = 'Piyoverse Network';
+        const 従業員導入 = document.getElementById('employeesIntro'); if(従業員導入) 従業員導入.innerText = 'Piyoverse Networkはピヨバースの従業員専用のメッセージングプラットフォームです。アクセスは創業者からの直接招待によってのみ付与されます。招待を希望する場合は、個別にご連絡ください。';
+    }
+
+    document.getElementById('themeSelect').value=テーマ;
+    document.getElementById('patternSelect').value=パターン;
+    document.getElementById('languageSelect').value=言語;
+}
+
+適用設定();
+
+// Events
+document.getElementById('themeSelect').addEventListener('change',e=>{localStorage.setItem('theme',e.target.value);適用設定();});
+document.getElementById('patternSelect').addEventListener('change',e=>{localStorage.setItem('pattern',e.target.value);適用設定();});
+document.getElementById('languageSelect').addEventListener('change',e=>{localStorage.setItem('language',e.target.value);適用設定();});
+document.getElementById('resetBtn').addEventListener('click',()=>{localStorage.removeItem('theme');localStorage.removeItem('pattern');localStorage.removeItem('language');適用設定();});
+
+// CSS / Scripts toggles
+const CSS入力 = document.getElementById('cssToggle');
+const SCRIPT入力 = document.getElementById('scriptToggle');
+if(CSS入力){
+    CSS入力.checked = localStorage.getItem('cssEnabled') === null ? true : localStorage.getItem('cssEnabled') === 'true';
+    CSS入力.addEventListener('change', e=>{
+        const val = e.target.checked;
+        localStorage.setItem('cssEnabled', val);
+        const st = document.getElementById('mainStyles'); if(st) st.disabled = !val;
+    });
+}
+if(SCRIPT入力){
+    SCRIPT入力.checked = localStorage.getItem('scriptsEnabled') === null ? true : localStorage.getItem('scriptsEnabled') === 'true';
+    SCRIPT入力.addEventListener('change', e=>{
+        const val = e.target.checked;
+        localStorage.setItem('scriptsEnabled', val);
+        window.スクリプト有効 = val;
+        if(val) 適用設定();
+    });
+}
+const ダーク入力 = document.getElementById('darkToggle');
+if(ダーク入力){
+    ダーク入力.checked = localStorage.getItem('darkMode') === 'true' ? true : _darkInitial;
+    ダーク入力.addEventListener('change', e=>{
+        const val = e.target.checked;
+        localStorage.setItem('darkMode', val);
+        適用設定();
+    });
+}
+
+// Employees page navigation
+const 従業員リンク = document.getElementById('employeesLink');
+const 従業員ページ = document.getElementById('employeesPage');
+const メインパネルグローバル = document.getElementById('mainPanel');
+const 従業員戻る = document.getElementById('employeesBack');
+function 表示従業員(){
+    if(メインパネルグローバル) メインパネルグローバル.style.display='none';
+    if(従業員ページ) 従業員ページ.style.display='block';
+    適用設定();
+    window.scrollTo(0,0);
+}
+function 非表示従業員(){
+    if(従業員ページ) 従業員ページ.style.display='none';
+    if(メインパネルグローバル) メインパネルグローバル.style.display='block';
+    適用設定();
+    window.scrollTo(0,0);
+}
+if(従業員戻る) 従業員戻る.addEventListener('click', 非表示従業員);
+if(従業員リンク) 従業員リンク.addEventListener('click', (e)=>{ e.preventDefault(); 表示従業員(); });
+</script>
+
 </body>
 </html>
-
