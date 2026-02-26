@@ -534,7 +534,8 @@ function 表示アリア背景(){
             const r = await fetch(path);
             if(!r.ok) return null;
             const txt = await r.text();
-            if(txt && txt.startsWith('data:image')) return txt;
+            const cleaned = (txt || '').replace(/\s+/g, '');
+            if(cleaned && cleaned.startsWith('data:image')) return cleaned;
         }catch(e){/*ignore*/}
         return null;
     };
@@ -566,7 +567,8 @@ function 表示スタークレスト2背景(){
             const r = await fetch(path);
             if(!r.ok) return null;
             const txt = await r.text();
-            if(txt && txt.startsWith('data:image')) return txt;
+            const cleaned = (txt || '').replace(/\s+/g, '');
+            if(cleaned && cleaned.startsWith('data:image')) return cleaned;
         }catch(e){/*ignore*/}
         return null;
     };
@@ -598,7 +600,8 @@ function 表示スタークレストサーガ背景(){
             const r = await fetch(path);
             if(!r.ok) return null;
             const txt = await r.text();
-            if(txt && txt.startsWith('data:image')) return txt;
+            const cleaned = (txt || '').replace(/\s+/g, '');
+            if(cleaned && cleaned.startsWith('data:image')) return cleaned;
         }catch(e){/*ignore*/}
         return null;
     };
@@ -630,7 +633,8 @@ function 表示リアイヤ背景(){
             const r = await fetch(path);
             if(!r.ok) return null;
             const txt = await r.text();
-            if(txt && txt.startsWith('data:image')) return txt;
+            const cleaned = (txt || '').replace(/\s+/g, '');
+            if(cleaned && cleaned.startsWith('data:image')) return cleaned;
         }catch(e){/*ignore*/}
         return null;
     };
