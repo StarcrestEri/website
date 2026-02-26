@@ -1,1 +1,0 @@
-!function(){try{try{if(window.__legacy_low_end)return}catch(r){}if(!("serviceWorker"in navigator))return;window.addEventListener("load",function(){try{navigator.serviceWorker.register("/sw.js",{scope:"/"})}catch(r){}})}catch(r){}}();
