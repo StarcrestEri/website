@@ -1,1 +1,0 @@
-self.addEventListener("install",function(){try{self.skipWaiting()}catch(t){}}),self.addEventListener("activate",function(t){try{t.waitUntil(self.clients.claim())}catch(t){}});
