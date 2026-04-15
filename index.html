@@ -1,0 +1,275 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>ピヨバースエンターテインメント</title>
+
+<link rel="stylesheet" href="https://unpkg.com/98.css">
+<link rel="stylesheet" href="style.css">
+
+<script src="https://unpkg.com/webamp@1.5.0/built/webamp.bundle.min.js"></script>
+
+<script>
+function setBanner() {
+  document.getElementById("bannerText").textContent =
+    "もうすぐ登場：バーチャルスターがやってくるよ！望遠鏡をチェックしてね、彼女はめっちゃ注目だよ！";
+}
+
+function switchTab(id) {
+  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  document.getElementById(id).style.display = "block";
+}
+
+let crashed = false;
+
+let audioPool = [];
+
+function playCrashAudio() {
+  const audio = new Audio("eatshitanddie.mp3");
+
+  audio.play();
+
+  audioPool.push(audio);
+
+  // keep only last 5
+  if (audioPool.length > 100) {
+    const old = audioPool.shift();
+    old.pause();
+    old.currentTime = 0;
+  }
+
+  audio.onended = () => {
+    audioPool = audioPool.filter(a => a !== audio);
+  };
+}
+
+function fakeClose() {
+  if (crashed) return;
+  crashed = true;
+
+  const content = document.getElementById("contentArea");
+
+  // BLACKOUT LAYER (simple DOM overlay, no layout break)
+  const blackout = document.createElement("div");
+  blackout.id = "blackout";
+
+  blackout.style.position = "absolute";
+  blackout.style.top = "0";
+  blackout.style.left = "0";
+  blackout.style.width = "100%";
+  blackout.style.height = "100%";
+  blackout.style.background = "black";
+  blackout.style.zIndex = "999";
+  blackout.style.display = "flex";
+  blackout.style.flexDirection = "column";
+  blackout.style.alignItems = "center";
+  blackout.style.justifyContent = "center";
+  blackout.style.gap = "10px";
+
+  // GIF (centered, no scaling)
+  const gif = document.createElement("img");
+  gif.src = "eatshitanddie.gif";
+  gif.style.display = "block";
+  gif.style.width = "auto";
+  gif.style.height = "auto";
+
+  // PNG (centered, fits window width)
+  const png = document.createElement("img");
+  png.src = "export.png";
+  png.style.display = "block";
+  png.style.maxWidth = "65%";
+  png.style.height = "auto";
+
+  blackout.appendChild(gif);
+  blackout.appendChild(png);
+
+  document.body.appendChild(blackout);
+
+  // hide original UI visually (but keep structure intact)
+  document.querySelector(".window").style.visibility = "hidden";
+
+  // start audio immediately
+  playCrashAudio();
+
+  // click-to-retrigger audio (crash mode only)
+  document.addEventListener("click", crashClickAudio);
+}
+
+function crashClickAudio() {
+  if (!crashed) return;
+  playCrashAudio();
+}
+window.addEventListener("DOMContentLoaded", () => {
+  setBanner();
+
+  const container = document.getElementById("webamp-window");
+
+  const webamp = new Webamp({
+    initialTracks: [],
+    initialSkin: { url: "./Win-98_Ruby.wsz" }
+  });
+
+  webamp.renderWhenReady(container);
+});
+</script>
+
+</head>
+
+<body>
+
+<div class="window main-window">
+
+  <div class="title-bar">
+    <div class="title-bar-text">ピヨバースエンターテインメント</div>
+    <div class="title-bar-controls">
+      <button aria-label="Minimize"></button>
+      <button aria-label="Maximize"></button>
+
+      <!-- FAKE CLOSE HOOK ADDED -->
+      <button aria-label="Close" onclick="fakeClose()"></button>
+    </div>
+  </div>
+
+  <div class="banner">
+    <span id="bannerText"></span>
+  </div>
+
+  <div class="window-body layout">
+
+    <!-- CONTENT WRAPPER (DO NOT REMOVE OR CHANGE YOUR TEXT INSIDE) -->
+    <div id="contentArea">
+
+      <menu role="tablist">
+        <li role="tab"><a href="#" onclick="switchTab('home')">ホーム</a></li>
+        <li role="tab"><a href="#" onclick="switchTab('game')">ゲーム</a></li>
+        <li role="tab"><a href="#" onclick="switchTab('upcoming')">今後のゲーム</a></li>
+        <li role="tab"><a href="#" onclick="switchTab('music')">音楽</a></li>
+        <li role="tab"><a href="#" onclick="switchTab('contact')">お問い合わせ</a></li>
+      </menu>
+
+      <!-- HOME -->
+      <div id="home" class="tab active">
+
+        <fieldset>
+          <h1>ピヨバースエンターテインメントへようこそ！ (=^.^=)</h1>
+          <h2>近日公開</h2>
+          <p>バーチャルな星！</p>
+          <p>ピヨバースエンターテインメントは、アクション満載のゲームと魅力的な音楽作品に注力するグローバル企業です。</p>
+        </fieldset>
+
+      </div>
+
+      <!-- GAME -->
+      <div id="game" class="tab" style="display:none;">
+
+        <fieldset>
+
+          <h3>アリアと失われた星たち</h3>
+
+          <p>
+ある晩、若きアリアはぐっすり眠りたいと願いながら寝床についた...<br>
+しかし彼女は深い昏睡状態に陥り、夢の国へと迷い込んだ。<br>
+夢の国を旅している途中、彼女は夢に永遠に囚われていた少女サリアに出会います。<br>
+自分の世界に戻るためには、散らばった星を集めなければなりません。それは彼女の記憶を表しています。<br>
+もし彼女がすべての星を集められなければ、永遠に夢の国に閉じ込められてしまう。<br>
+ボルテックスは夢の国から来ており、最後にはボルテックスクイーンが待ち受けています。<br>
+ドリームランドの罠には気をつけろ。 <br>
+<p>『アリアと失われた星々』は、Piyoverse Entertainmentによる最新のSG-1000ビデオゲームで、<br>
+開発者の夏井宏美がこのリリースを担当しています！アリア・ナッサーを操作して、<br>
+夢の国をさまよおう！敵をかわして、星を集めて脱出しよう！もちろん、<br>
+他のプレイヤーのハイスコアを狙うこともできるよ！スタック、ゴールドスター、エリ、<br>
+そしてひろみに挑戦して、この素晴らしい新作を楽しもう！</p>
+<p>『アリアと失われた星々』はSG-1000で遊べます。<u>今日買おう！<u></p>
+          </p>
+
+        </fieldset>
+
+      </div>
+
+      <!-- UPCOMING -->
+      <div id="upcoming" class="tab" style="display:none;">
+
+        <fieldset>
+
+          <h3>スタークレスト</h3>
+          <p>発売日: TBA<br>プラットフォーム: Mark III</p>
+
+          <h3>スタークレスト2</h3>
+          <p>発売日: TBA<br>プラットフォーム: メガドライブ</p>
+
+          <h3>スタークレストサーガ</h3>
+          <p>
+アリアと失われた星たちからスタークレスト2まで、全てのスタークレストゲームを収録しています。
+          </p>
+
+          <p>
+ご注意ください：現在、開発中のタイトルがあります。開発期間は内容によって異なる場合があります。<br>
+共同作業者および従業員の心の健康を尊重するため、今後の製品、発売日、<br>
+または今後のタイトルに関する質問はご遠慮いただきますようお願い申し上げます。<br>
+ご理解のほど、よろしくお願いいたします。— 夏井 弘美
+          </p>
+
+        </fieldset>
+
+      </div>
+
+      <!-- MUSIC -->
+      <div id="music" class="tab" style="display:none;">
+
+        <fieldset>
+
+          <p>
+ピヨバースエンターテインメント公式リリースをBandcampで聴くことができます。
+          </p>
+
+          <p>
+Piyoverse Entertainmentは音楽作りの腕前が抜群で、最新アルバムも例外ではないよ！<br>
+最新アルバム『Starcrest Saga』には、4人の才能あるアーティストによる30曲以上のユニークな曲が収録されてるんだ！<br>
+ぜひ聴いてみて！
+          </p>
+
+          <p>
+<a href="https://piyoverse.bandcamp.com/" target="_blank">ここをクリック！</a>
+          </p>
+
+        </fieldset>
+
+      </div>
+
+      <!-- CONTACT -->
+      <div id="contact" class="tab" style="display:none;">
+
+        <fieldset>
+
+          <h3>お問い合わせ</h3>
+
+          <p><a href="mailto:contact@piyoverse.net">contact@piyoverse.net</a></p>
+
+          <p>
+社員専用：ピヨバースネットワーク — アクセスについては創業者へお問い合わせください。
+          </p>
+
+        </fieldset>
+
+      </div>
+
+      <!-- FOOTER -->
+      <fieldset class="footer">
+        <p>
+このサイトを通じたサービスや製品の勧誘はご遠慮ください。協業のご提案については当社の窓口へご連絡ください。
+        </p>
+
+        <p>
+© Piyoverse Entertainment. 無断転載を禁じます。Alia and the Lost Stars™、Starcrest™、Piyoverse™、Piyoverse Network™ は Piyoverse Entertainment の商標または登録商標です。
+        </p>
+      </fieldset>
+
+    </div>
+  </div>
+</div>
+
+<!-- WEBAMP -->
+<div id="webamp-window"></div>
+
+</body>
+</html>
