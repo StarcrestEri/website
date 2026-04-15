@@ -53,13 +53,13 @@ function fakeClose() {
   const blackout = document.createElement("div");
   blackout.id = "blackout";
 
-  blackout.style.position = "absolute";
+  blackout.style.position = "fixed";
   blackout.style.top = "0";
   blackout.style.left = "0";
-  blackout.style.width = "100%";
-  blackout.style.height = "100%";
+  blackout.style.width = "100vw";
+  blackout.style.height = "100vh";
+  blackout.style.zIndex = "999999";
   blackout.style.background = "black";
-  blackout.style.zIndex = "999";
   blackout.style.display = "flex";
   blackout.style.flexDirection = "column";
   blackout.style.alignItems = "center";
