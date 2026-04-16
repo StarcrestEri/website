@@ -6,26 +6,32 @@
 
 <link rel="stylesheet" href="https://unpkg.com/98.css">
 <link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle/minified.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
 
 <script src="https://unpkg.com/webamp@1.5.0/built/webamp.bundle.min.js"></script>
 
 <script>
 function setBanner() {
   document.getElementById("bannerText").textContent =
-    "もうすぐ登場：バーチャルスターがやってくるよ！望遠鏡をチェックしてね、彼女はめっちゃ注目だよ！";
+    "バーチャルスターがやってきた！詳しくはホームページをチェックしてみてね！";
 }
 
 function switchTab(id) {
-  document.querySelectorAll(".tab").forEach(t => t.style.display = "none");
+  var tabs = document.querySelectorAll(".tab");
+  for (var i = 0; i < tabs.length; i++) {
+    tabs[i].style.display = "none";
+  }
+
   document.getElementById(id).style.display = "block";
 }
 
-let crashed = false;
+var crashed = false;
 
-let audioPool = [];
+var audioPool = [];
 
 function playCrashAudio() {
-  const audio = new Audio("eatshitanddie.mp3");
+  var audio = new Audio("eatshitanddie.mp3");
 
   audio.play();
 
@@ -33,13 +39,15 @@ function playCrashAudio() {
 
   // keep only last 5
   if (audioPool.length > 100) {
-    const old = audioPool.shift();
+    var old = audioPool.shift();
     old.pause();
     old.currentTime = 0;
   }
 
-  audio.onended = () => {
-    audioPool = audioPool.filter(a => a !== audio);
+  audio.onended = function() {
+    audioPool = audioPool.filter(function(a) {
+      return a !== audio;
+    });
   };
 }
 
@@ -47,34 +55,32 @@ function fakeClose() {
   if (crashed) return;
   crashed = true;
 
-  const content = document.getElementById("contentArea");
+  var content = document.getElementById("contentArea");
 
-  // BLACKOUT LAYER (simple DOM overlay, no layout break)
-  const blackout = document.createElement("div");
-  blackout.id = "blackout";
+var blackout = document.createElement("div");
+blackout.id = "blackout";
 
-  blackout.style.position = "fixed";
-  blackout.style.top = "0";
-  blackout.style.left = "0";
-  blackout.style.width = "100vw";
-  blackout.style.height = "100vh";
-  blackout.style.zIndex = "999999";
-  blackout.style.background = "black";
-  blackout.style.display = "flex";
-  blackout.style.flexDirection = "column";
-  blackout.style.alignItems = "center";
-  blackout.style.justifyContent = "center";
-  blackout.style.gap = "10px";
-
+blackout.style.position = "fixed";
+blackout.style.top = "0";
+blackout.style.left = "0";
+blackout.style.width = "100vw";
+blackout.style.height = "100vh";
+blackout.style.background = "black";
+blackout.style.zIndex = "999999";
+blackout.style.display = "flex";
+blackout.style.flexDirection = "column";
+blackout.style.alignItems = "center";
+blackout.style.justifyContent = "center";
+blackout.style.gap = "10px";
   // GIF (centered, no scaling)
-  const gif = document.createElement("img");
+  var gif = document.createElement("img");
   gif.src = "eatshitanddie.gif";
   gif.style.display = "block";
   gif.style.width = "auto";
   gif.style.height = "auto";
 
   // PNG (centered, fits window width)
-  const png = document.createElement("img");
+  var png = document.createElement("img");
   png.src = "export.png";
   png.style.display = "block";
   png.style.maxWidth = "65%";
@@ -99,12 +105,12 @@ function crashClickAudio() {
   if (!crashed) return;
   playCrashAudio();
 }
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", function() {
   setBanner();
 
-  const container = document.getElementById("webamp-window");
+  var container = document.getElementById("webamp-window");
 
-  const webamp = new Webamp({
+  var webamp = new Webamp({
     initialTracks: [
       {
         url: "./music/Piyoverse - Starcrest Saga - 01 Lost Stars.mp3",
@@ -201,9 +207,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
         <fieldset>
           <h1>ピヨバースエンターテインメントへようこそ！ (=^.^=)</h1>
-          <h2>近日公開</h2>
-          <p>バーチャルな星！</p>
-          <p>ピヨバースエンターテインメントは、アクション満載のゲームと魅力的な音楽作品に注力するグローバル企業です。</p>
+
+          <h3>ニュース</h3>
+          <ul>
+            <p>スタークレストは近日リリース予定です！</br>
+            バーチャルスターが登場！詳細は以下をチェックしてね！</p>
+          </ul>
+        </fieldset>
+        <fieldset>
+          <h1>バーチャルスターがやってきた！</h1>
+          <img src="stardust_nova.png"
+              alt="Stardust Nova"
+              style="display:block; margin:0 auto; width:auto; height:auto; max-width:none;">
         </fieldset>
 
       </div>
