@@ -28,8 +28,11 @@ body {
   flex-direction: column;
   margin: 0 auto;
 
-  position: relative; /* REQUIRED for footer pin */
-  overflow: hidden;   /* prevents footer overlap glitches */
+  position: relative; /* IMPORTANT for ads */
+  overflow: hidden;
+
+  padding-bottom: 6px;
+  box-sizing: border-box;
 }
 
 /* =========================
@@ -39,21 +42,32 @@ body {
   display: flex !important;
 }
 
-/* =========================
-   BANNER
-   ========================= */
 .banner {
-  background: red;
+  background: rgb(228, 0, 0);
   color: white;
   overflow: hidden;
   white-space: nowrap;
   font-size: 18px;
+
+  margin-bottom: 6px;
+
+  height: 24px;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  border-bottom: 1px solid #800000;
+  border-right: 1px solid #800000;
 }
 
 .banner span {
   display: inline-block;
   padding-left: 100%;
   animation: scroll 10s linear infinite;
+  font-weight: bold;
+  text-shadow: 2px 2px 0 #800000;
 }
 
 @keyframes scroll {
@@ -79,17 +93,36 @@ p  { font-size: 15px; }
   overflow: hidden;
 }
 
-/* main content wrapper */
+/* main scroll area */
 #contentArea {
   flex: 1;
   overflow: auto;
 
-  /* IMPORTANT: prevents content going under footer */
-  padding-bottom: 140px;
+  /* space so ads + footer don't overlap content */
+  padding-bottom: 200px;
 }
 
 /* =========================
    TABS SYSTEM
+   ========================= */
+menu[role="tablist"] {
+  margin-top: 4px;
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 2;
+}
+
+menu[role="tablist"] li {
+  position: relative;
+  z-index: 1;
+}
+
+menu[role="tablist"] li[aria-selected="true"] {
+  z-index: 3;
+}
+
+/* =========================
+   TAB CONTENT
    ========================= */
 .tab {
   display: none;
@@ -99,25 +132,58 @@ p  { font-size: 15px; }
   display: block;
 }
 
-/* fieldsets behave normally */
 .tab fieldset {
   display: block;
+  margin-top: 0;
 }
 
 /* =========================
-   🔥 FOOTER (TRUE WINDOW PIN FIX)
+   FOOTER (WIN98 STYLE FIX)
    ========================= */
 .footer {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
 
   margin: 0;
   padding: 8px;
 
-  background: #c0c0c0; /* Win98-ish fallback */
+  background: #c0c0c0;
   box-sizing: border-box;
+}
+
+/* =========================
+   ADS (INSIDE WINDOW FIXED)
+   ========================= */
+#adContainer {
+  position: absolute;
+  left: 6px;
+
+  /* sits above footer area */
+  bottom: 140px;
+
+  z-index: 10;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  align-items: flex-start;
+}
+
+/* IMPORTANT: no resizing, use native image size */
+#adContainer img {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: none;
+  max-height: none;
+
+  image-rendering: pixelated;
+  cursor: pointer;
 }
 
 /* =========================
@@ -137,4 +203,99 @@ p  { font-size: 15px; }
 #webamp {
   position: fixed !important;
   z-index: 2147483647 !important;
+}
+
+/* =========================
+   IMAGE LOADING / DIALUP EFFECT
+   ========================= */
+#contentArea img {
+  display: block;
+  position: relative;
+}
+
+img.dialup {
+  -webkit-mask-image: linear-gradient(to bottom,
+    black 0%,
+    black 0%,
+    transparent 0%
+  );
+  mask-image: linear-gradient(to bottom,
+    black 0%,
+    black 0%,
+    transparent 0%
+  );
+}
+#adPanel {
+  position: absolute;
+  left: 6px;
+  bottom: 140px;
+
+  width: auto;
+  z-index: 10;
+}
+
+/* Win98-style container */
+.ad-window {
+  width: auto;
+  display: inline-block;
+
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  box-shadow: inset 1px 1px #ffffff, inset -1px -1px #404040;
+}
+
+/* inner body gives padding + gray base */
+.ad-window .window-body {
+  padding: 6px;
+  background: #c0c0c0;
+}
+
+/* image must stay natural size */
+#adImage {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: none;
+  max-height: none;
+
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+#adSection {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 120px;
+
+  padding: 8px;
+
+  background: #c0c0c0;
+  box-sizing: border-box;
+
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  gap: 8px;
+}
+
+/* keep image natural size */
+#adImage {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: none;
+  max-height: none;
+
+  image-rendering: pixelated;
+  cursor: pointer;
 }

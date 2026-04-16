@@ -3,32 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <title>ピヨバースエンターテインメント</title>
-
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="stylesheet" href="https://unpkg.com/98.css">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/core-js-bundle/minified.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
-
 <script src="https://unpkg.com/webamp@1.5.0/built/webamp.bundle.min.js"></script>
-
 <script>
 function setBanner() {
   document.getElementById("bannerText").textContent =
     "バーチャルスターがやってきた！詳しくはホームページをチェックしてみてね！";
 }
+var tabSeen = {};
+var activeTabId = null;
+var dialupSessions = new WeakMap();
+window.addEventListener("DOMContentLoaded", function () {
 
+  var ads = [
+    {
+      src: "ads/sgengine.png",
+      action: "link",
+      url: "https://sgengine.dev/"
+    },
+    {
+      src: "ads/%E3%82%B9%E3%82%BF%E3%83%BC%E3%82%AF%E3%83%AC%E3%82%B9%E3%83%88.png",
+      action: "link",
+      url: "https://piyoverse.net/"
+    },
+    {
+      src: "ads/MDE.png",
+      action: "link",
+      url: "https://mdengine.dev/"
+    },
+    {
+      src: "ads/eat-shit-and-die.png",
+      action: "close"
+    }
+  ];
+
+  var adIndex = 0;
+
+  var adImg = document.getElementById("adImage");
+  var adLink = document.getElementById("adLink");
+
+  function renderAd() {
+    if (!adImg || !adLink) return;
+
+    var ad = ads[adIndex];
+
+    adImg.src = ad.src;
+
+    if (ad.action === "close") {
+      adLink.href = "#";
+      adLink.onclick = function (e) {
+        e.preventDefault();
+        fakeClose();
+      };
+    } else {
+      adLink.onclick = null;
+      adLink.href = ad.url;
+      adLink.target = "_blank";
+    }
+
+    adIndex = (adIndex + 1) % ads.length;
+  }
+
+  renderAd();
+  setInterval(renderAd, 30000);
+
+});
 function switchTab(id) {
   var tabs = document.querySelectorAll(".tab");
+
   for (var i = 0; i < tabs.length; i++) {
     tabs[i].style.display = "none";
   }
 
-  document.getElementById(id).style.display = "block";
+  var tab = document.getElementById(id);
+  tab.style.display = "block";
+
+  // tab button UI state
+  var tabButtons = document.querySelectorAll('menu[role="tablist"] li');
+
+  for (var i = 0; i < tabButtons.length; i++) {
+    tabButtons[i].setAttribute("aria-selected", "false");
+  }
+
+  var links = document.querySelectorAll('menu[role="tablist"] a');
+
+  for (var i = 0; i < links.length; i++) {
+    if (links[i].getAttribute("onclick").includes(id)) {
+      links[i].parentElement.setAttribute("aria-selected", "true");
+    }
+  }
+
+  // 🔥 SCROLL LOCK FOR HOME TAB
+  var content = document.getElementById("contentArea");
+
+  if (id === "home") {
+    content.style.overflow = "hidden";
+  } else {
+    content.style.overflow = "auto";
+  }
+
+  runDialupImages(tab, id);
 }
 
 var crashed = false;
 
 var audioPool = [];
+function runDialupImages(tab, tabId) {
+  var images = tab.querySelectorAll("img");
+
+  var isRepeat = tabSeen[tabId] === true;
+  tabSeen[tabId] = true;
+
+  var steps = 6;
+
+  function getDialupDelay(isRepeat, step) {
+    var base = isRepeat ? 110 : 420;
+
+    var jitter = (Math.random() - 0.5) * (isRepeat ? 180 : 260);
+
+    var spike = Math.random() < 0.1
+      ? Math.random() * (isRepeat ? 250 : 500)
+      : 0;
+
+    var progression = step * (isRepeat ? 10 : 22);
+
+    var delay = base + jitter + spike + progression;
+
+    return Math.max(40, Math.min(delay, 1200));
+  }
+
+  images.forEach(function(img) {
+
+    var old = dialupSessions.get(img);
+    if (old) {
+      clearTimeout(old.timeout);
+      old.cancelled = true;
+    }
+
+    img.style.webkitMaskImage =
+      "linear-gradient(to bottom, black 0%, transparent 0%)";
+    img.style.maskImage =
+      "linear-gradient(to bottom, black 0%, transparent 0%)";
+
+    var session = {
+      step: 0,
+      cancelled: false,
+      timeout: null
+    };
+
+    dialupSessions.set(img, session);
+
+    function revealStep() {
+      if (session.cancelled) return;
+
+      session.step++;
+
+      var percent = (session.step / steps) * 100;
+
+      img.style.webkitMaskImage =
+        "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
+      img.style.maskImage =
+        "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
+
+      if (session.step < steps) {
+        session.timeout = setTimeout(revealStep,
+          getDialupDelay(isRepeat, session.step)
+        );
+      }
+    }
+
+    session.timeout = setTimeout(revealStep, 25 + Math.random() * 150);
+  });
+}
 
 function playCrashAudio() {
   var audio = new Audio("eatshitanddie.mp3");
@@ -107,9 +257,13 @@ function crashClickAudio() {
 }
 window.addEventListener("DOMContentLoaded", function() {
   setBanner();
-
+  setPiyomiMessage();
+  initImageReveal();
   var container = document.getElementById("webamp-window");
-
+  var content = document.getElementById("contentArea");
+    if (document.getElementById("home").style.display !== "none") {
+      content.style.overflow = "hidden";
+    }
   var webamp = new Webamp({
     initialTracks: [
       {
@@ -162,10 +316,74 @@ window.addEventListener("DOMContentLoaded", function() {
       }
     ],
     initialSkin: { url: "./Win-98_Ruby.wsz" }
+    
   });
+
+  function initImageReveal() {
+    var images = document.querySelectorAll("#contentArea img");
+
+    function getDialupDelay(step) {
+      var base = 420;
+
+      var jitter = (Math.random() - 0.5) * 260;
+
+      var spike = Math.random() < 0.12 ? Math.random() * 500 : 0;
+
+      var progression = step * 22;
+
+      var delay = base + jitter + spike + progression;
+
+      return Math.max(60, Math.min(delay, 1200));
+    }
+
+    images.forEach(function(img) {
+      img.classList.add("dialup");
+
+      var steps = 6;
+      var step = 0;
+
+      function revealStep() {
+        step++;
+
+        var percent = (step / steps) * 100;
+
+        img.style.webkitMaskImage =
+          "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
+        img.style.maskImage =
+          "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
+
+        if (step < steps) {
+          setTimeout(revealStep, getDialupDelay(step));
+        }
+      }
+
+      setTimeout(revealStep, 50 + Math.random() * 150);
+    });
+  }
 
   webamp.renderWhenReady(container);
 });
+
+function setPiyomiMessage() {
+  var messages = [
+    "ゲームはこまめにセーブするのを忘れないでね！",
+    "ボスが無理そうに見えるなら、多分ただボタンを連打してないだけだよ。",
+    "みんな、これ読んだりしてるの？▓▒░(°◡°)░▒▓",
+    "ステータスバーが消えても、それはただのミニマリストなUIデザインだからだよ！信じて！٩(◕‿◕)۶",
+    "セーブファイルを検出しました…なーんて、冗談だよ。頑張ってね！╮(︶▽︶)╭",
+    "読み込み中…読み込み中…読み込み中…なんでまだここにいるの？ ∪･ω･∪"
+  ];
+
+  var selected = messages[Math.floor(Math.random() * messages.length)];
+
+  var container = document.getElementById("piyomiText");
+  container.innerHTML = "";
+
+  var li = document.createElement("li");
+  li.textContent = selected;
+
+  container.appendChild(li);
+}
 </script>
 
 </head>
@@ -195,11 +413,12 @@ window.addEventListener("DOMContentLoaded", function() {
     <div id="contentArea">
 
       <menu role="tablist">
-        <li role="tab"><a href="#" onclick="switchTab('home')">ホーム</a></li>
-        <li role="tab"><a href="#" onclick="switchTab('game')">ゲーム</a></li>
-        <li role="tab"><a href="#" onclick="switchTab('upcoming')">今後のゲーム</a></li>
-        <li role="tab"><a href="#" onclick="switchTab('music')">音楽</a></li>
-        <li role="tab"><a href="#" onclick="switchTab('contact')">お問い合わせ</a></li>
+      <li role="tab" aria-selected="true"><a href="#" onclick="switchTab('home')">ホーム</a></li>
+      <li role="tab"><a href="#" onclick="switchTab('game')">ゲーム</a></li>
+      <li role="tab"><a href="#" onclick="switchTab('upcoming')">今後のゲーム</a></li>
+      <li role="tab"><a href="#" onclick="switchTab('music')">音楽</a></li>
+      <li role="tab"><a href="#" onclick="switchTab('contact')">お問い合わせ</a></li>
+      <li role="tab"><a href="#" onclick="switchTab('about')">会社概要</a></li>
       </menu>
 
       <!-- HOME -->
@@ -215,7 +434,6 @@ window.addEventListener("DOMContentLoaded", function() {
           </ul>
         </fieldset>
         <fieldset>
-          <h1>バーチャルスターがやってきた！</h1>
           <img src="stardust_nova.png"
               alt="Stardust Nova"
               style="display:block; margin:0 auto; width:auto; height:auto; max-width:none;">
@@ -226,27 +444,45 @@ window.addEventListener("DOMContentLoaded", function() {
       <!-- GAME -->
       <div id="game" class="tab" style="display:none;">
 
-        <fieldset>
+<fieldset>
 
-          <h3>アリアと失われた星たち</h3>
+  <h3>アリアと失われた星たち</h3>
 
-          <p>
+  <div style="display:flex; align-items:flex-start; gap:12px;">
+
+    <!-- IMAGE LEFT -->
+    <img src="aliaandtheloststars.png"
+         alt="Alia and the Lost Stars"
+         style="width:auto; height:auto; max-width:auto;">
+
+    <!-- TEXT RIGHT -->
+    <div>
+      <p>
 ある晩、若きアリアはぐっすり眠りたいと願いながら寝床についた...<br>
 しかし彼女は深い昏睡状態に陥り、夢の国へと迷い込んだ。<br>
 夢の国を旅している途中、彼女は夢に永遠に囚われていた少女サリアに出会います。<br>
 自分の世界に戻るためには、散らばった星を集めなければなりません。それは彼女の記憶を表しています。<br>
 もし彼女がすべての星を集められなければ、永遠に夢の国に閉じ込められてしまう。<br>
 ボルテックスは夢の国から来ており、最後にはボルテックスクイーンが待ち受けています。<br>
-ドリームランドの罠には気をつけろ。 <br>
-<p>『アリアと失われた星々』は、Piyoverse Entertainmentによる最新のSG-1000ビデオゲームで、<br>
+ドリームランドの罠には気をつけろ。
+      </p>
+
+      <p>
+『アリアと失われた星々』は、Piyoverse Entertainmentによる最新のSG-1000ビデオゲームで、<br>
 開発者の夏井宏美がこのリリースを担当しています！アリア・ナッサーを操作して、<br>
 夢の国をさまよおう！敵をかわして、星を集めて脱出しよう！もちろん、<br>
 他のプレイヤーのハイスコアを狙うこともできるよ！スタック、ゴールドスター、エリ、<br>
-そしてひろみに挑戦して、この素晴らしい新作を楽しもう！</p>
-<p>『アリアと失われた星々』はSG-1000で遊べます。<u>今日買おう！<u></p>
-          </p>
+そしてひろみに挑戦して、この素晴らしい新作を楽しもう！
+      </p>
 
-        </fieldset>
+      <p>
+『アリアと失われた星々』はSG-1000で遊べます。<u>今日買おう！</u>
+      </p>
+    </div>
+
+  </div>
+
+</fieldset>
 
       </div>
 
@@ -317,14 +553,49 @@ Piyoverse Entertainmentは音楽作りの腕前が抜群で、最新アルバム
 
       </div>
 
-      <!-- FOOTER -->
+      <!-- ABOUT -->
+      <div id="about" class="tab" style="display:none;">
+
+        <fieldset>
+
+          <h3>会社概要</h3>
+
+          <p>
+      Piyoverse Entertainmentは、ゲームおよび音楽を中心としたメディア制作を行うエンターテインメント企業です。<br>
+      高品質なコンテンツの提供を通じて、世界中のユーザーに新しい体験と価値を届けることを目指しています。<br>
+      当社は創造性と技術力を融合させ、多様なプロジェクトを展開しています。<br>
+      今後も継続的な成長と革新を通じて、より魅力的な作品を生み出していきます。
+          </p>
+
+        </fieldset>
+
+        <fieldset>
+
+          <h3>ぴよみが言うよ：</h3>
+
+          <div style="display:flex; align-items:flex-start; gap:10px;">
+            <img src="piyomien.png" alt="Piyomi" style="width:auto; height:auto;">
+
+            <ul class="tree-view" id="piyomiText">
+            </ul>
+          </div>
+
+        </fieldset>
+
+      </div>
+      <!-- ADS -->
+      <div id="adSection">
+        <a id="adLink" href="#" target="_blank">
+          <img id="adImage" src="" alt="ad" />
+        </a>
+      </div>
       <fieldset class="footer">
         <p>
 このサイトを通じたサービスや製品の勧誘はご遠慮ください。協業のご提案については当社の窓口へご連絡ください。
         </p>
 
         <p>
-© Piyoverse Entertainment. 無断転載を禁じます。Alia and the Lost Stars™、Starcrest™、Piyoverse™、Piyoverse Network™ は Piyoverse Entertainment の商標または登録商標です。
+© Piyoverse Entertainment. 無断転載を禁じます。Alia and the Lost Stars™、Piyomi En™、Starcrest™、Piyoverse™、Piyoverse Network™ は Piyoverse Entertainment の商標または登録商標です。
         </p>
       </fieldset>
 
