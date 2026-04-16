@@ -19,24 +19,24 @@ body {
 }
 
 /* =========================
-   MAIN WINDOW
+   MAIN WINDOW (ANCHOR SYSTEM)
    ========================= */
 .main-window {
   width: 900px;
   height: 100vh;
-  margin: 0 auto;
-
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 
-  position: relative;
+  position: relative; /* IMPORTANT for ads */
   overflow: hidden;
 
+  padding-bottom: 6px;
   box-sizing: border-box;
 }
 
 /* =========================
-   TITLE BAR / BANNER
+   TITLE BAR
    ========================= */
 .title-bar-controls {
   display: flex !important;
@@ -45,18 +45,16 @@ body {
 .banner {
   background: rgb(228, 0, 0);
   color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 18px;
+
+  margin-bottom: 6px;
 
   height: 24px;
   display: flex;
   align-items: center;
-
-  font-size: 18px;
   font-weight: bold;
-
-  overflow: hidden;
-  white-space: nowrap;
-
-  margin-bottom: 6px;
 
   border-top: 1px solid #fff;
   border-left: 1px solid #fff;
@@ -68,6 +66,7 @@ body {
   display: inline-block;
   padding-left: 100%;
   animation: scroll 10s linear infinite;
+  font-weight: bold;
   text-shadow: 2px 2px 0 #800000;
 }
 
@@ -94,13 +93,17 @@ p  { font-size: 15px; }
   overflow: hidden;
 }
 
+/* main scroll area */
 #contentArea {
   flex: 1;
   overflow: auto;
+
+  /* space so ads + footer don't overlap content */
+  padding-bottom: 200px;
 }
 
 /* =========================
-   TABS
+   TABS SYSTEM
    ========================= */
 menu[role="tablist"] {
   margin-top: 4px;
@@ -111,6 +114,7 @@ menu[role="tablist"] {
 
 menu[role="tablist"] li {
   position: relative;
+  z-index: 1;
 }
 
 menu[role="tablist"] li[aria-selected="true"] {
@@ -129,53 +133,47 @@ menu[role="tablist"] li[aria-selected="true"] {
 }
 
 .tab fieldset {
+  display: block;
   margin-top: 0;
 }
 
 /* =========================
-   FOOTER + ADS (FIXED SYSTEM)
+   FOOTER (WIN98 STYLE FIX)
    ========================= */
-
-/*
-  THIS is the fix:
-  footer + ads become a stacked dock at bottom
-*/
-
 .footer {
-  background: #c0c0c0;
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
 
-  margin: 0 6px 6px 6px;
+  margin: 0;
   padding: 8px;
 
+  background: #c0c0c0;
   box-sizing: border-box;
-
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #808080;
-  border-bottom: 1px solid #808080;
 }
 
-/* unified ad container */
-#adSection {
-  margin: 0 6px 6px 6px;
+/* =========================
+   ADS (INSIDE WINDOW FIXED)
+   ========================= */
+#adContainer {
+  position: absolute;
+  left: 6px;
 
-  background: #c0c0c0;
-  padding: 8px;
+  /* sits above footer area */
+  bottom: 140px;
+
+  z-index: 10;
 
   display: flex;
-  gap: 8px;
-  align-items: center;
+  flex-direction: column;
+  gap: 6px;
 
-  box-sizing: border-box;
-
-  border-top: 1px solid #ffffff;
-  border-left: 1px solid #ffffff;
-  border-right: 1px solid #808080;
-  border-bottom: 1px solid #808080;
+  align-items: flex-start;
 }
 
-/* ad images */
-#adSection img {
+/* IMPORTANT: no resizing, use native image size */
+#adContainer img {
   display: block;
 
   width: auto;
@@ -195,11 +193,11 @@ menu[role="tablist"] li[aria-selected="true"] {
   position: fixed;
   right: 20px;
   bottom: 20px;
-
   width: 300px;
   height: 116px;
-
   z-index: 999999;
+  display: block;
+  visibility: visible;
 }
 
 #webamp {
@@ -208,7 +206,7 @@ menu[role="tablist"] li[aria-selected="true"] {
 }
 
 /* =========================
-   DIALUP EFFECT
+   IMAGE LOADING / DIALUP EFFECT
    ========================= */
 #contentArea img {
   display: block;
@@ -216,6 +214,88 @@ menu[role="tablist"] li[aria-selected="true"] {
 }
 
 img.dialup {
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 0%, transparent 0%);
-  mask-image: linear-gradient(to bottom, black 0%, black 0%, transparent 0%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    black 0%,
+    black 0%,
+    transparent 0%
+  );
+  mask-image: linear-gradient(to bottom,
+    black 0%,
+    black 0%,
+    transparent 0%
+  );
+}
+#adPanel {
+  position: absolute;
+  left: 6px;
+  bottom: 140px;
+
+  width: auto;
+  z-index: 10;
+}
+
+/* Win98-style container */
+.ad-window {
+  width: auto;
+  display: inline-block;
+
+  background: #c0c0c0;
+  border: 2px solid #808080;
+  box-shadow: inset 1px 1px #ffffff, inset -1px -1px #404040;
+}
+
+/* inner body gives padding + gray base */
+.ad-window .window-body {
+  padding: 6px;
+  background: #c0c0c0;
+}
+
+/* image must stay natural size */
+#adImage {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: none;
+  max-height: none;
+
+  image-rendering: pixelated;
+  cursor: pointer;
+}
+#adSection {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 120px;
+
+  padding: 8px;
+
+  background: #c0c0c0;
+  box-sizing: border-box;
+
+  border-top: 1px solid #ffffff;
+  border-left: 1px solid #ffffff;
+  border-right: 1px solid #808080;
+  border-bottom: 1px solid #808080;
+
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+
+  gap: 8px;
+}
+
+/* keep image natural size */
+#adImage {
+  display: block;
+
+  width: auto;
+  height: auto;
+
+  max-width: none;
+  max-height: none;
+
+  image-rendering: pixelated;
+  cursor: pointer;
 }
