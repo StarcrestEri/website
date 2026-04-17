@@ -266,33 +266,3 @@ img.dialup {
   align-items: center;
   gap: 8px;
 }
-
-/* =========================
-   NEW OPTIONS WINDOW (NO GREY OUTER BORDER, BORDER HUGGING CONTENT AND TITLE BAR)
-   ========================= */
-#options-window {
-  width: 225px;
-  height: 125px;
-  background-color: #c0c0c0;  /* Grey outer window */
-  border: 2px solid #808080;  /* Border now only hugging the content and title bar */
-  box-shadow: inset 1px 1px #ffffff, inset -1px -1px #404040;  /* Shadow for the inner window */
-  padding: 0;  /* Remove any padding that might be pushing the title bar down */
-  position: absolute;
-  cursor: move; /* Makes the window draggable */
-  top: 0;  /* Ensure no space above */
-}
-
-#options-window .window-body {
-  background-color: #c0c0c0;  /* Grey background for the content area */
-  padding: 10px;
-  margin-top: 15px;  /* Ensure space for the title bar */
-}
-
-#options-window .title-bar {
-  background-color: #000080;
-  color: white;
-  padding: 6px;  /* Adjust padding to make it fit neatly */
-  margin-top: 3px;
-  margin-left: 3px;
-  margin-right: 3px;
-}
