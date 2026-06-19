@@ -1,610 +1,779 @@
-<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">
+<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <title>ピヨバースエンターテインメント</title>
+
 <link rel="icon" type="image/png" href="favicon.png">
-<link rel="stylesheet" href="https://unpkg.com/98.css">
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/core-js-bundle/minified.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
-<script src="https://unpkg.com/webamp@1.5.0/built/webamp.bundle.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/7.css">
+
+<!--スクリーンショットコンテナのスタイル-->
+<style>
+.screenshot-container {
+    text-align: left;
+}
+.screenshot-container img {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+}
+</style>
+
+<!--ページ切り替えスクリプト-->
 <script>
-function setBanner() {
-  document.getElementById("bannerText").textContent =
-    "バーチャルスターがやってきた！詳しくはホームページをチェックしてみてね！";
-}
-var tabSeen = {};
-var activeTabId = null;
-var dialupSessions = new WeakMap();
-window.addEventListener("DOMContentLoaded", function () {
-
-  var ads = [
-    {
-      src: "ads/sgengine.png",
-      action: "link",
-      url: "https://sgengine.dev/"
-    },
-    {
-      src: "ads/%E3%82%B9%E3%82%BF%E3%83%BC%E3%82%AF%E3%83%AC%E3%82%B9%E3%83%88.png",
-      action: "link",
-      url: "https://piyoverse.net/"
-    },
-    {
-      src: "ads/MDE.png",
-      action: "link",
-      url: "https://mdengine.dev/"
-    },
-    {
-      src: "ads/eat-shit-and-die.png",
-      action: "close"
+function showPage(id) {
+    var pages = document.getElementsByClassName("page");
+    var i;
+    for (i = 0; i < pages.length; i++) {
+        pages[i].className = "page";
     }
-  ];
-
-  var adIndex = 0;
-
-  var adImg = document.getElementById("adImage");
-  var adLink = document.getElementById("adLink");
-
-  function renderAd() {
-    if (!adImg || !adLink) return;
-
-    var ad = ads[adIndex];
-
-    adImg.src = ad.src;
-
-    if (ad.action === "close") {
-      adLink.href = "#";
-      adLink.onclick = function (e) {
-        e.preventDefault();
-        fakeClose();
-      };
-    } else {
-      adLink.onclick = null;
-      adLink.href = ad.url;
-      adLink.target = "_blank";
-    }
-
-    adIndex = (adIndex + 1) % ads.length;
-  }
-
-  renderAd();
-  setInterval(renderAd, 30000);
-
-});
-function switchTab(id) {
-  var tabs = document.querySelectorAll(".tab");
-
-  for (var i = 0; i < tabs.length; i++) {
-    tabs[i].style.display = "none";
-  }
-
-  var tab = document.getElementById(id);
-  tab.style.display = "block";
-
-  // tab button UI state
-  var tabButtons = document.querySelectorAll('menu[role="tablist"] li');
-
-  for (var i = 0; i < tabButtons.length; i++) {
-    tabButtons[i].setAttribute("aria-selected", "false");
-  }
-
-  var links = document.querySelectorAll('menu[role="tablist"] a');
-
-  for (var i = 0; i < links.length; i++) {
-    if (links[i].getAttribute("onclick").includes(id)) {
-      links[i].parentElement.setAttribute("aria-selected", "true");
-    }
-  }
-
-  // 🔥 SCROLL LOCK FOR HOME TAB
-  var content = document.getElementById("contentArea");
-
-  if (id === "home") {
-    content.style.overflow = "hidden";
-  } else {
-    content.style.overflow = "auto";
-  }
-
-  runDialupImages(tab, id);
-}
-
-var crashed = false;
-
-var audioPool = [];
-function runDialupImages(tab, tabId) {
-  var images = tab.querySelectorAll("img");
-
-  var isRepeat = tabSeen[tabId] === true;
-  tabSeen[tabId] = true;
-
-  var steps = 6;
-
-  function getDialupDelay(isRepeat, step) {
-    var base = isRepeat ? 110 : 420;
-
-    var jitter = (Math.random() - 0.5) * (isRepeat ? 180 : 260);
-
-    var spike = Math.random() < 0.1
-      ? Math.random() * (isRepeat ? 250 : 500)
-      : 0;
-
-    var progression = step * (isRepeat ? 10 : 22);
-
-    var delay = base + jitter + spike + progression;
-
-    return Math.max(40, Math.min(delay, 1200));
-  }
-
-  images.forEach(function(img) {
-
-    var old = dialupSessions.get(img);
-    if (old) {
-      clearTimeout(old.timeout);
-      old.cancelled = true;
-    }
-
-    img.style.webkitMaskImage =
-      "linear-gradient(to bottom, black 0%, transparent 0%)";
-    img.style.maskImage =
-      "linear-gradient(to bottom, black 0%, transparent 0%)";
-
-    var session = {
-      step: 0,
-      cancelled: false,
-      timeout: null
-    };
-
-    dialupSessions.set(img, session);
-
-    function revealStep() {
-      if (session.cancelled) return;
-
-      session.step++;
-
-      var percent = (session.step / steps) * 100;
-
-      img.style.webkitMaskImage =
-        "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
-      img.style.maskImage =
-        "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
-
-      if (session.step < steps) {
-        session.timeout = setTimeout(revealStep,
-          getDialupDelay(isRepeat, session.step)
-        );
-      }
-    }
-
-    session.timeout = setTimeout(revealStep, 25 + Math.random() * 150);
-  });
-}
-
-function playCrashAudio() {
-  var audio = new Audio("eatshitanddie.mp3");
-
-  audio.play();
-
-  audioPool.push(audio);
-
-  // keep only last 5
-  if (audioPool.length > 100) {
-    var old = audioPool.shift();
-    old.pause();
-    old.currentTime = 0;
-  }
-
-  audio.onended = function() {
-    audioPool = audioPool.filter(function(a) {
-      return a !== audio;
-    });
-  };
-}
-
-function fakeClose() {
-  if (crashed) return;
-  crashed = true;
-
-  var content = document.getElementById("contentArea");
-
-var blackout = document.createElement("div");
-blackout.id = "blackout";
-
-blackout.style.position = "fixed";
-blackout.style.top = "0";
-blackout.style.left = "0";
-blackout.style.width = "100vw";
-blackout.style.height = "100vh";
-blackout.style.background = "black";
-blackout.style.zIndex = "999999";
-blackout.style.display = "flex";
-blackout.style.flexDirection = "column";
-blackout.style.alignItems = "center";
-blackout.style.justifyContent = "center";
-blackout.style.gap = "10px";
-  // GIF (centered, no scaling)
-  var gif = document.createElement("img");
-  gif.src = "eatshitanddie.gif";
-  gif.style.display = "block";
-  gif.style.width = "auto";
-  gif.style.height = "auto";
-
-  // PNG (centered, fits window width)
-  var png = document.createElement("img");
-  png.src = "export.png";
-  png.style.display = "block";
-  png.style.maxWidth = "65%";
-  png.style.height = "auto";
-
-  blackout.appendChild(gif);
-  blackout.appendChild(png);
-
-  document.body.appendChild(blackout);
-
-  // hide original UI visually (but keep structure intact)
-  document.querySelector(".window").style.visibility = "hidden";
-
-  // start audio immediately
-  playCrashAudio();
-
-  // click-to-retrigger audio (crash mode only)
-  document.addEventListener("click", crashClickAudio);
-}
-
-function crashClickAudio() {
-  if (!crashed) return;
-  playCrashAudio();
-}
-window.addEventListener("DOMContentLoaded", function() {
-  setBanner();
-  setPiyomiMessage();
-  initImageReveal();
-  var container = document.getElementById("webamp-window");
-  var content = document.getElementById("contentArea");
-    if (document.getElementById("home").style.display !== "none") {
-      content.style.overflow = "hidden";
-    }
-  var webamp = new Webamp({
-    initialTracks: [
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 01 Lost Stars.mp3",
-        metaData: {
-          title: "Lost Stars",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      },
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 02 Wait it Out! - MKIII (feat. Enahu64).mp3",
-        metaData: {
-          title: "Wait it Out! (MKIII) [feat. Enahu64]",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      },
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 03 Sweep All of 'Em - MKIII (feat. BlueElectric05).mp3",
-        metaData: {
-          title: "Sweep All of 'Em (MKIII) [feat. BlueElectric05]",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      },
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 04 Springtime Mischief - MK III (feat. Enahu64).mp3",
-        metaData: {
-          title: "Springtime Mischief (MKIII) [feat. Enahu64]",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      },
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 05 Hot and Spicy - MKIII.mp3",
-        metaData: {
-          title: "Hot and Spicy (MKIII)",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      },
-      {
-        url: "./music/Piyoverse - Starcrest Saga - 06 Get Back to Work, Dermanater. - MKIII (feat. Enahu64).mp3",
-        metaData: {
-          title: "Get Back to Work, Dermanater. (MKIII) [feat. Enahu64]",
-          artist: "Piyoverse",
-          album: "Starcrest Saga"
-        }
-      }
-    ],
-    initialSkin: { url: "./Win-98_Ruby.wsz" }
-    
-  });
-
-  function initImageReveal() {
-    var images = document.querySelectorAll("#contentArea img");
-
-    function getDialupDelay(step) {
-      var base = 420;
-
-      var jitter = (Math.random() - 0.5) * 260;
-
-      var spike = Math.random() < 0.12 ? Math.random() * 500 : 0;
-
-      var progression = step * 22;
-
-      var delay = base + jitter + spike + progression;
-
-      return Math.max(60, Math.min(delay, 1200));
-    }
-
-    images.forEach(function(img) {
-      img.classList.add("dialup");
-
-      var steps = 6;
-      var step = 0;
-
-      function revealStep() {
-        step++;
-
-        var percent = (step / steps) * 100;
-
-        img.style.webkitMaskImage =
-          "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
-        img.style.maskImage =
-          "linear-gradient(to bottom, black " + percent + "%, transparent " + percent + "%)";
-
-        if (step < steps) {
-          setTimeout(revealStep, getDialupDelay(step));
-        }
-      }
-
-      setTimeout(revealStep, 50 + Math.random() * 150);
-    });
-  }
-
-  webamp.renderWhenReady(container);
-});
-
-function setPiyomiMessage() {
-  var messages = [
-    "ゲームはこまめにセーブするのを忘れないでね！",
-    "ボスが無理そうに見えるなら、多分ただボタンを連打してないだけだよ。",
-    "みんな、これ読んだりしてるの？▓▒░(°◡°)░▒▓",
-    "ステータスバーが消えても、それはただのミニマリストなUIデザインだからだよ！信じて！٩(◕‿◕)۶",
-    "セーブファイルを検出しました…なーんて、冗談だよ。頑張ってね！╮(︶▽︶)╭",
-    "読み込み中…読み込み中…読み込み中…なんでまだここにいるの？ ∪･ω･∪"
-  ];
-
-  var selected = messages[Math.floor(Math.random() * messages.length)];
-
-  var container = document.getElementById("piyomiText");
-  container.innerHTML = "";
-
-  var li = document.createElement("li");
-  li.textContent = selected;
-
-  container.appendChild(li);
+    document.getElementById(id).className = "page active";
+    return false;
 }
 </script>
 
 </head>
 
 <body>
+<!--全体のコンテナ！サイドナビとメインコンテンツを包みます。えり、やめてよ。-->
+<div id="page">
 
-<div class="window main-window">
-
-  <div class="title-bar">
-    <div class="title-bar-text">ピヨバースエンターテインメント</div>
-    <div class="title-bar-controls">
-      <button aria-label="Minimize"></button>
-      <button aria-label="Maximize"></button>
-
-      <!-- FAKE CLOSE HOOK ADDED -->
-      <button aria-label="Close" onclick="fakeClose()"></button>
-    </div>
-  </div>
-
-  <div class="banner">
-    <span id="bannerText"></span>
-  </div>
-
-  <div class="window-body layout">
-
-    <!-- CONTENT WRAPPER (DO NOT REMOVE OR CHANGE YOUR TEXT INSIDE) -->
-    <div id="contentArea">
-
-      <menu role="tablist">
-      <li role="tab" aria-selected="true"><a href="#" onclick="switchTab('home')">ホーム</a></li>
-      <li role="tab"><a href="#" onclick="switchTab('game')">ゲーム</a></li>
-      <li role="tab"><a href="#" onclick="switchTab('upcoming')">今後のゲーム</a></li>
-      <li role="tab"><a href="#" onclick="switchTab('music')">音楽</a></li>
-      <li role="tab"><a href="#" onclick="switchTab('contact')">お問い合わせ</a></li>
-      <li role="tab"><a href="#" onclick="switchTab('about')">会社概要</a></li>
-      </menu>
-
-      <!-- HOME -->
-      <div id="home" class="tab active">
-
-        <fieldset>
-          <h1>ピヨバースエンターテインメントへようこそ！ (=^.^=)</h1>
-
-          <h3>ニュース</h3>
-          <ul>
-            <p>スタークレストは近日リリース予定です！</br>
-            バーチャルスターが登場！詳細は以下をチェックしてね！</p>
-          </ul>
-        </fieldset>
-        <fieldset>
-          <img src="stardust_nova.png"
-              alt="Stardust Nova"
-              style="display:block; margin:0 auto; width:auto; height:auto; max-width:none;">
-        </fieldset>
-
-      </div>
-
-      <!-- GAME -->
-      <div id="game" class="tab" style="display:none;">
-
-<fieldset>
-
-  <h3>アリアと失われた星たち</h3>
-
-  <div style="display:flex; align-items:flex-start; gap:12px;">
-
-    <!-- IMAGE LEFT -->
-    <img src="aliaandtheloststars.png"
-         alt="Alia and the Lost Stars"
-         style="width:auto; height:auto; max-width:auto;">
-
-    <!-- TEXT RIGHT -->
-    <div>
-      <p>
-ある晩、若きアリアはぐっすり眠りたいと願いながら寝床についた...<br>
-しかし彼女は深い昏睡状態に陥り、夢の国へと迷い込んだ。<br>
-夢の国を旅している途中、彼女は夢に永遠に囚われていた少女サリアに出会います。<br>
-自分の世界に戻るためには、散らばった星を集めなければなりません。それは彼女の記憶を表しています。<br>
-もし彼女がすべての星を集められなければ、永遠に夢の国に閉じ込められてしまう。<br>
-ボルテックスは夢の国から来ており、最後にはボルテックスクイーンが待ち受けています。<br>
-ドリームランドの罠には気をつけろ。
-      </p>
-
-      <p>
-『アリアと失われた星々』は、Piyoverse Entertainmentによる最新のSG-1000ビデオゲームで、<br>
-開発者の夏井宏美がこのリリースを担当しています！アリア・ナッサーを操作して、<br>
-夢の国をさまよおう！敵をかわして、星を集めて脱出しよう！もちろん、<br>
-他のプレイヤーのハイスコアを狙うこともできるよ！スタック、ゴールドスター、エリ、<br>
-そしてひろみに挑戦して、この素晴らしい新作を楽しもう！
-      </p>
-
-      <p>
-『アリアと失われた星々』はSG-1000で遊べます。<u>今日買おう！</u>
-      </p>
-    </div>
-
-  </div>
-
-</fieldset>
-
-      </div>
-
-      <!-- UPCOMING -->
-      <div id="upcoming" class="tab" style="display:none;">
-
-        <fieldset>
-
-          <h3>スタークレスト</h3>
-          <p>発売日: TBA<br>プラットフォーム: Mark III</p>
-
-          <h3>スタークレスト2</h3>
-          <p>発売日: TBA<br>プラットフォーム: メガドライブ</p>
-
-          <h3>スタークレストサーガ</h3>
-          <p>
-アリアと失われた星たちからスタークレスト2まで、全てのスタークレストゲームを収録しています。
-          </p>
-
-          <p>
-ご注意ください：現在、開発中のタイトルがあります。開発期間は内容によって異なる場合があります。<br>
-共同作業者および従業員の心の健康を尊重するため、今後の製品、発売日、<br>
-または今後のタイトルに関する質問はご遠慮いただきますようお願い申し上げます。<br>
-ご理解のほど、よろしくお願いいたします。— 夏井 弘美
-          </p>
-
-        </fieldset>
-
-      </div>
-
-      <!-- MUSIC -->
-      <div id="music" class="tab" style="display:none;">
-
-        <fieldset>
-
-          <p>
-ピヨバースエンターテインメント公式リリースをBandcampで聴くことができます。
-          </p>
-
-          <p>
-Piyoverse Entertainmentは音楽作りの腕前が抜群で、最新アルバムも例外ではないよ！<br>
-最新アルバム『Starcrest Saga』には、4人の才能あるアーティストによる30曲以上のユニークな曲が収録されてるんだ！<br>
-ぜひ聴いてみて！
-          </p>
-
-          <p>
-<a href="https://piyoverse.bandcamp.com/" target="_blank">ここをクリック！</a>
-          </p>
-
-        </fieldset>
-
-      </div>
-
-      <!-- CONTACT -->
-      <div id="contact" class="tab" style="display:none;">
-
-        <fieldset>
-
-          <h3>お問い合わせ</h3>
-
-          <p><a href="mailto:contact@piyoverse.net">contact@piyoverse.net</a></p>
-
-          <p>
-社員専用：ピヨバースネットワーク — アクセスについては創業者へお問い合わせください。
-          </p>
-
-        </fieldset>
-
-      </div>
-
-      <!-- ABOUT -->
-      <div id="about" class="tab" style="display:none;">
-
-        <fieldset>
-
-          <h3>会社概要</h3>
-
-          <p>
-      Piyoverse Entertainmentは、ゲームおよび音楽を中心としたメディア制作を行うエンターテインメント企業です。<br>
-      高品質なコンテンツの提供を通じて、世界中のユーザーに新しい体験と価値を届けることを目指しています。<br>
-      当社は創造性と技術力を融合させ、多様なプロジェクトを展開しています。<br>
-      今後も継続的な成長と革新を通じて、より魅力的な作品を生み出していきます。
-          </p>
-
-        </fieldset>
-
-        <fieldset>
-
-          <h3>ぴよみが言うよ：</h3>
-
-          <div style="display:flex; align-items:flex-start; gap:10px;">
-            <img src="piyomien.png" alt="Piyomi" style="width:auto; height:auto;">
-
-            <ul class="tree-view" id="piyomiText">
-            </ul>
-          </div>
-
-        </fieldset>
-
-      </div>
-      <!-- ADS -->
-      <div id="adSection">
-        <a id="adLink" href="#" target="_blank">
-          <img id="adImage" src="" alt="ad" />
+<div id="header">
+    <div id="header-logo">
+        <a href="#" onclick="return showPage('home')">
+            <img src="sitelogo.png" id="logo" alt="Site Logo" loading="lazy">
         </a>
-      </div>
-      <fieldset class="footer">
-        <p>
-このサイトを通じたサービスや製品の勧誘はご遠慮ください。協業のご提案については当社の窓口へご連絡ください。
-        </p>
-
-        <p>
-© Piyoverse Entertainment. 無断転載を禁じます。Alia and the Lost Stars™、Piyomi En™、Starcrest™、Piyoverse™、Piyoverse Network™ は Piyoverse Entertainment の商標または登録商標です。
-        </p>
-      </fieldset>
-
     </div>
-  </div>
+    <h3>ピヨバースネットワークへようこそ！</h3>
+
+    <div class="header-right">
+        <div class="header-links">
+            <a href="#" onclick="return showPage('network')">ログイン</a>
+            <a href="#" onclick="return showPage('contact')">新規登録</a>
+            <a href="#" onclick="return openHelpScreen()">ご質問はございますか？</a>
+        </div>
+        <div class="searchbox">
+            <input id="music-search" type="search" placeholder="Search" autocomplete="off" />
+            <button type="button" aria-label="search"></button>
+            <div id="search-results" class="search-results" aria-live="polite"></div>
+        </div>
+    </div>
 </div>
 
-<!-- WEBAMP -->
-<div id="webamp-window"></div>
+<div id="contentWrapper">
+<div id="sideNav">
+    <ul>
+    <li>
+        <a href="#" onclick="return showPage('games')">
+            <img src="gamesicon.png" class="nav-icon" alt="" loading="lazy">
+            ゲーム
+        </a>
+    </li>
+    <li>
+        <a href="#" onclick="return showPage('music')">
+            <img src="musicicon.png" class="nav-icon" alt="" loading="lazy">
+            音楽
+        </a>
+    </li>
+    <li>
+        <a href="#" onclick="return showPage('network')">
+            <img src="networkicon.png" class="nav-icon" alt="" loading="lazy">
+            ピヨバースネットワーク
+        </a>
+    </li>
+    <li>
+        <a href="#" onclick="return showPage('about')">
+            <img src="abouticon.png" class="nav-icon" alt="" loading="lazy">
+            会社概要
+        </a>
+    </li>
+    <li>
+        <a href="#" onclick="return showPage('contact')">
+            <img src="contacticon.png" class="nav-icon" alt="" loading="lazy">
+            お問い合わせ
+        </a>
+    </li>
+    </ul>
 
+</div>
+
+<!--メインコンテンツ！各ページの内容がここに表示されます。最初はニュースが表示されます。-->
+<div id="main">
+
+<div id="help-screen">
+    <img src="eatshitanddie.gif" id="help-gif" loading="lazy">
+    <img src="export.png" id="help-export" loading="lazy">
+</div>
+
+<script>
+const audioPool = [];
+const MAX_AUDIO = 100;
+function playHelpAudio() {
+    const audio = new Audio("eatshitanddie.mp3");
+    audio.volume = 1.0;
+    audioPool.push(audio);
+    if (audioPool.length > MAX_AUDIO) {
+        const old = audioPool.shift();
+
+        old.pause();
+        old.currentTime = 0;
+    }
+    audio.play();
+}
+function openHelpScreen() {
+    const screen = document.getElementById("help-screen");
+    screen.style.display = "flex";
+    playHelpAudio();
+    screen.onclick = function () {
+        playHelpAudio();
+    };
+
+    return false;
+}
+</script>
+
+<div id="home" class="page active">
+    <div class="contentBox">
+        <div id="carouselContainer">
+            <div class="carousel">
+                <div class="carousel-arrow left-arrow">&#10094;</div>
+                <div class="carousel-images">
+                </div>
+                <div class="carousel-arrow right-arrow">&#10095;</div>
+            </div>
+            <div class="carousel-dots">
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="games" class="page">
+    <div class="contentBox">
+        <h2>ゲーム</h2>
+        <div class="game-listings">
+            <div class="game-card">
+                <img src="aliaandtheloststars.png" alt="アリアと失われた星たち" class="game-cover" loading="lazy">
+                <div class="game-meta">
+                    <h3>アリアと失われた星たち</h3>
+                    <p>アリアはひどく体調を崩し、その結果深い昏睡状態に陥ります。その昏睡中に、彼女は夢の国に迷い込みます。そこはボルテックスの生き物たちが住む不思議な世界です。夢の国に入った瞬間に散らばった心を取り戻すため、失われたすべての星を集める冒険が始まります。</p>
+                    <p><a href="#" onclick="return showPage('music')">サウンドトラックを見る</a></p>
+                </div>
+            </div>
+
+            <div class="game-card">
+                <img src="carousel/image2.jpg" alt="Hexpress" class="game-cover" loading="lazy">
+                <div class="game-meta">
+                    <h3>Hexpress</h3>
+                    <p>72時間ゲームジャムで制作された魔法配送アクション。短いプレイ時間の中で、軽快なテンポと個性的な世界観を楽しめるタイトルです。</p>
+                    <p><a href="https://runicpixels.itch.io/hexpress" target="_blank" rel="noopener">itch.ioページを開く</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="music" class="page">
+    <div class="contentBox">
+        <h2>音楽</h2>
+
+        <div id="featured-track" class="contentBox">
+            <h3>本日のおすすめトラック</h3>
+            <div id="featured-inner">読み込み中…</div>
+        </div>
+
+        <h3>音楽リスト</h3>
+        <div id="bandcamp-listings" class="bandcamp-listings"></div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    var releases = [
+        {
+            type: 'track',
+            artist: 'Piyoverse Entertainment',
+            title: 'Alia and the Lost Stars',
+            url: 'https://piyoverse.bandcamp.com/track/alia-and-the-lost-stars',
+            cover: 'https://f4.bcbits.com/img/a0702859779_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Starcrest',
+            url: 'https://piyoverse.bandcamp.com/album/starcrest-3',
+            cover: 'https://f4.bcbits.com/img/a2200375781_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Starcrest 2',
+            url: 'https://piyoverse.bandcamp.com/album/starcrest-2',
+            cover: 'https://f4.bcbits.com/img/a3027143888_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Starcrest Adventure',
+            url: 'https://piyoverse.bandcamp.com/album/starcrest-adventure',
+            cover: 'https://f4.bcbits.com/img/a0800372693_10.jpg'
+        },
+        {
+            type: 'track',
+            artist: 'Piyoverse Entertainment',
+            title: 'Sweet Cruisin\'',
+            url: 'https://piyoverse.bandcamp.com/track/sweet-cruisin',
+            cover: 'https://f4.bcbits.com/img/a1998329533_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Hexpress',
+            url: 'https://piyoverse.bandcamp.com/album/hexpress',
+            cover: 'https://f4.bcbits.com/img/a2505389465_10.jpg'
+        },
+        {
+            type: 'track',
+            artist: 'Piyoverse Entertainment',
+            title: 'Dungeon Escape',
+            url: 'https://piyoverse.bandcamp.com/track/dungeon-escape',
+            cover: 'https://f4.bcbits.com/img/a2483492457_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Astro-Dreams',
+            url: 'https://piyoverse.bandcamp.com/album/astro-dreams',
+            cover: 'https://f4.bcbits.com/img/a3409134529_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'Ocean 542',
+            url: 'https://piyoverse.bandcamp.com/album/ocean-542',
+            cover: 'https://f4.bcbits.com/img/a1101395556_10.jpg'
+        },
+        {
+            type: 'track',
+            artist: 'Piyoverse Entertainment',
+            title: 'Picnic With You',
+            url: 'https://piyoverse.bandcamp.com/track/picnic-with-you',
+            cover: 'https://f4.bcbits.com/img/a1219698479_10.jpg'
+        },
+        {
+            type: 'album',
+            artist: 'Piyoverse Entertainment',
+            title: 'blood on the floor',
+            url: 'https://piyoverse.bandcamp.com/album/blood-on-the-floor',
+            cover: 'https://f4.bcbits.com/img/a3617309379_10.jpg'
+        },
+        {
+            type: 'track',
+            artist: 'Piyoverse Entertainment',
+            title: 'Astro-Dreams',
+            url: 'https://piyoverse.bandcamp.com/track/astro-dreams-2',
+            cover: 'https://f4.bcbits.com/img/a2808960800_10.jpg'
+        }
+    ];
+
+    var listingsElem = document.getElementById('bandcamp-listings');
+    var searchInput = document.getElementById('music-search');
+    var searchResults = document.getElementById('search-results');
+    var featuredInner = document.getElementById('featured-inner');
+    var secretTriggered = false;
+
+    function renderListings(items) {
+        listingsElem.innerHTML = items.map(function (item) {
+            return '<div class="release-card">'
+                + '<a href="' + item.url + '" target="_blank" rel="noopener">'
+                + '<img src="' + item.cover + '" alt="' + item.title + '" class="bc-cover" loading="lazy" />'
+                + '<div class="bc-meta">'
+                + '<strong>' + item.title + '</strong><br />'
+                + '<span>' + item.artist + '</span><br />'
+                + '<span class="result-type">' + (item.type === 'album' ? 'Album' : 'Track') + '</span>'
+                + (item.album ? '<br /><span class="result-type">' + item.album + '</span>' : '')
+                + '</div></a></div>';
+        }).join('');
+    }
+
+    function formatSearchResults(items) {
+        var markup = '<ul role="listbox" class="has-shadow has-hover">';
+        if (!items.length) {
+            markup += '<li role="option" aria-disabled="true">No results found</li>';
+            markup += '</ul>';
+            return markup;
+        }
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            markup += '<li role="option" data-url="' + item.url + '">'
+                + item.title + ' - ' + item.artist + ' (' + (item.type === 'album' ? 'Album' : 'Track') + ')'
+                + '</li>';
+        }
+        markup += '</ul>';
+        return markup;
+    }
+
+    function searchListings(term) {
+        var normalized = term.trim().toLowerCase();
+        if (!normalized) {
+            return [];
+        }
+        return releases.filter(function (item) {
+            var text = (item.title + ' ' + item.artist + ' ' + (item.album || '')).toLowerCase();
+            return text.indexOf(normalized) !== -1;
+        });
+    }
+
+    function renderFeatured() {
+        var tracks = releases.filter(function (item) {
+            return item.type === 'track';
+        });
+        if (!tracks.length) {
+            featuredInner.textContent = '本日のおすすめトラックは利用できません。';
+            return;
+        }
+        var key = getJSTDateKey();
+        var index = key % tracks.length;
+        var track = tracks[index];
+        featuredInner.innerHTML = '<div style="zoom:1;">'
+            + '<div style="float:left;width:96px;height:96px;margin-right:12px;">'
+            + '<img src="' + track.cover + '" alt="' + track.title + '" loading="lazy" style="width:96px;height:96px;display:block;" />'
+            + '</div>'
+            + '<div style="overflow:hidden;">'
+            + '<strong>' + track.title + '</strong><br />'
+            + '<span>' + track.artist + '</span><br />'
+            + (track.album ? '<span>' + track.album + '</span><br />' : '')
+            + '<a href="' + track.url + '" target="_blank" rel="noopener">Bandcampで再生</a>'
+            + '</div>'
+            + '<div style="clear:both;"></div>'
+            + '</div>';
+    }
+
+    function getJSTDateKey() {
+        var now = new Date();
+        var jst = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        var y = jst.getUTCFullYear();
+        var m = jst.getUTCMonth() + 1;
+        var d = jst.getUTCDate();
+        return y * 10000 + m * 100 + d;
+    }
+
+    function showSearchResults(items) {
+        searchResults.innerHTML = formatSearchResults(items);
+        searchResults.style.display = 'block';
+        var nodes = searchResults.querySelectorAll('li[role="option"][data-url]');
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].addEventListener('click', function () {
+                window.open(this.getAttribute('data-url'), '_blank');
+                hideSearchResults();
+            });
+        }
+    }
+
+    function hideSearchResults() {
+        searchResults.style.display = 'none';
+    }
+
+    function normalizeSecretInput(term) {
+        return (term || '').toLowerCase().replace(/[\s\u3000]+/g, '');
+    }
+
+    searchInput.addEventListener('input', function () {
+        var normalizedSecret = normalizeSecretInput(this.value);
+        if (normalizedSecret.indexOf('eatshitanddie') !== -1) {
+            if (!secretTriggered) {
+                secretTriggered = true;
+                hideSearchResults();
+                openHelpScreen();
+            }
+            return;
+        }
+
+        secretTriggered = false;
+        var results = searchListings(this.value);
+        showSearchResults(results.slice(0, 8));
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!document.getElementById('header').contains(event.target)) {
+            hideSearchResults();
+        }
+    });
+
+    renderListings(releases);
+    renderFeatured();
+
+    (function scheduleRefresh() {
+        var now = new Date();
+        var jstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        var y = jstNow.getUTCFullYear();
+        var m = jstNow.getUTCMonth();
+        var d = jstNow.getUTCDate();
+        var nextMidnight = new Date(Date.UTC(y, m, d + 1, 0, 0, 5) - 9 * 60 * 60 * 1000);
+        var wait = nextMidnight.getTime() - now.getTime();
+        if (wait < 0) wait = 1000 * 60 * 60;
+        setTimeout(function () {
+            renderFeatured();
+            scheduleRefresh();
+        }, wait);
+    })();
+})();
+</script>
+
+<!--新しいページ！-->
+<div id="network" class="page">
+    <div class="contentBox">
+        <h2>ピヨバースネットワーク</h2>
+        <div class="network-note">
+            <p>このサービスは現在廃止され、サーバーはもはや機能していません。代替メッセージングサービスとしてEscargot WLMを利用することに決定しました。Piyoverse Network内のデータにアクセスしたい場合は、提供されたメールアドレスまでご連絡ください。</p>
+        </div>
+
+        <p>
+        Piyoverse Networkの現在のバージョンは0.1.0です。これはほぼ安定した初のビルドです。通知の安定性に問題があることにご注意ください。今後のビルドで、時間と資金があれば今後このプログラムを更新し続ける予定です。アルファ版のバグ修正には以下が含まれますが、これに限定されません:
+        </p>
+
+        <p>
+        1. アルファ0.0.43では、インストールの安定性に関する問題が発生しました。0.1.0以前は、インストール後すぐにインストールが自動的に消去されていました。これはプログラムエラーではなく、致命的なインストーラーエラーでした。私たちはこれを修正しました。
+        </p>
+
+        <p>
+        2. alpha 0.0.45では、インストーラーがアプリのインストール場所を「C:Program Files (x86)Piyoverse Network」ではなく「C:」に設定する問題が発生しました。この重大なバグは修正されました。
+        </p>
+
+        <p>
+        3. 最初のビルドから、インストーラーイメージにはおかしな写真を使っていました。Duke NukemにインスパイアされたAlia Nassarのレンダリングから、Piyomi Enのレンダリングに更新しました。
+        </p>
+
+        <p>
+        4. 現在、Windows 7およびWindows XPスタイルの境界に関連する整列バグや境界バグ、スクロールバグ、通知バグなどの不具合が存在しています。これらの問題は、将来のビルドで対処することを目指しています。
+        </p>
+
+        <hr>
+
+        <p>
+        Piyoverse Networkは、Piyoverse Networkブランドの協力者が安全かつ安心してコミュニケーションできるクローズドネットワークのメッセージングサービスです。この環境は協力者専用であり、一般公開はされていません。さらに、協力者向けに、このサーバーは緩やかなスケジュールで稼働しており、13:00 JSTから2:00 JSTの間はシャットダウンします。稼働時間は、サーバーを運営する協力者の勤務時間によって変動する場合があります。サーバーの稼働時間に関する詳細情報については、contact@piyoverse.net までメールでお問い合わせください。
+        </p>
+
+        <div class="screenshot-container">
+            <img src="Screenshot1.png" alt="Screenshot 1" loading="lazy">
+            <img src="Screenshot2.png" alt="Screenshot 2" loading="lazy">
+        </div>
+
+    </div>
+</div>
+<div id="about" class="page">
+    <div class="contentBox">
+        <h2>会社概要</h2>
+        <div class="piyomien-wrap">
+            <img src="piyomien.png" alt="piyomien" loading="lazy">
+            <div role="tooltip" class="about-balloon">準備してね！新しいコンテンツがまもなく追加されます！私たちはあなたと旅を共有するのがとても楽しみです！</div>
+        </div>
+        <p>Piyoverse Entertainmentはゲームと音楽制作企業です。</p>
+    </div>
+</div>
+
+<div id="contact" class="page">
+    <div class="contentBox">
+        <h2>お問い合わせ</h2>
+        <p><a href="mailto:contact@piyoverse.net">contact@piyoverse.net</a></p>
+    </div>
+</div>
+
+</div>
+</div>
+</div>
+<div id="footer">
+<p>このサイトを通じたサービスや製品の勧誘はご遠慮ください。</p>
+<p>© Piyoverse Entertainment</p>
+</div>
+
+<script>
+document.onreadystatechange = function () {
+    if (document.readyState === "complete") {
+
+        var carouselImages = document.getElementsByClassName("carousel-images")[0];
+        var carouselDots = document.getElementsByClassName("carousel-dots")[0];
+        var leftArrow = document.getElementsByClassName("left-arrow")[0];
+        var rightArrow = document.getElementsByClassName("right-arrow")[0];
+
+        var imageFolder = "carousel/";
+        var imageFiles = ["image1.jpg", "image2.jpg", "image3.jpg"];
+
+        if (!carouselImages || !carouselDots) {
+            return;
+        }
+
+        var currentIndex = 0;
+
+        // -----------------------------
+        // 旧式ブラウザ向け: テキスト選択を無効化
+        // -----------------------------
+        function disableSelect(el) {
+            if (!el) return;
+            el.onselectstart = function () { return false; };
+            el.ondragstart = function () { return false; };
+            el.style.cursor = "pointer";
+        }
+
+        disableSelect(leftArrow);
+        disableSelect(rightArrow);
+
+        // -----------------------------
+        // スライド幅を動的に取得
+        // -----------------------------
+        function getSlideWidth() {
+            var container = carouselImages.parentNode;
+            return container.offsetWidth;
+        }
+
+        // -----------------------------
+        // カルーセルの表示位置を更新
+        // -----------------------------
+        function updateCarousel() {
+
+            var slideWidth = getSlideWidth();
+
+            carouselImages.style.position = "relative";
+            carouselImages.style.left = "-" + (currentIndex * slideWidth) + "px";
+
+            var dots = carouselDots.getElementsByTagName("span");
+
+            for (var i = 0; i < dots.length; i++) {
+                dots[i].className = "";
+            }
+
+            if (dots[currentIndex]) {
+                dots[currentIndex].className = "active";
+            }
+        }
+
+        // -----------------------------
+        // ナビゲーション処理
+        // -----------------------------
+        function goToImage(index) {
+            if (index >= 0 && index < imageFiles.length) {
+                currentIndex = index;
+                updateCarousel();
+            }
+        }
+
+        function nextImage() {
+            currentIndex++;
+            if (currentIndex >= imageFiles.length) {
+                currentIndex = 0;
+            }
+            updateCarousel();
+        }
+
+        function prevImage() {
+            currentIndex--;
+            if (currentIndex < 0) {
+                currentIndex = imageFiles.length - 1;
+            }
+            updateCarousel();
+        }
+
+        // -----------------------------
+        // カルーセル要素を構築
+        // -----------------------------
+        for (var i = 0; i < imageFiles.length; i++) {
+
+			var img = document.createElement("img");
+			img.src = imageFolder + imageFiles[i];
+			img.alt = "Image " + (i + 1);
+            img.loading = "lazy";
+
+            // 画像をクリック可能にする
+			img.style.cursor = "pointer";
+
+            // 画像1 -> ゲームページ
+			if (i === 0) {
+				img.onclick = function () {
+					return showPage('games');
+				};
+			}
+
+            // 画像2 -> イッチページ
+			else if (i === 1) {
+				img.onclick = function () {
+					window.open("https://runicpixels.itch.io/hexpress", "_blank");
+				};
+			}
+
+			carouselImages.appendChild(img);
+
+            var dot = document.createElement("span");
+
+            // 旧式ブラウザ向け: インデックスを安全に束縛
+            dot.setAttribute("data-index", i);
+
+            dot.onclick = function () {
+                goToImage(parseInt(this.getAttribute("data-index"), 10));
+            };
+
+            carouselDots.appendChild(dot);
+        }
+
+        // -----------------------------
+        // 矢印操作 (IE7対応)
+        // -----------------------------
+        if (leftArrow) {
+            leftArrow.onclick = prevImage;
+        }
+
+        if (rightArrow) {
+            rightArrow.onclick = nextImage;
+        }
+
+        // -----------------------------
+        // 初期化
+        // -----------------------------
+        updateCarousel();
+    }
+};
+</script>
 </body>
 </html>
+<script>
+(function (global) {
+
+  var SDK_VERSION = "3.0.0";
+
+  var CONFIG = {
+    sampleIntervalMs: 1000,
+    anomalyThresholdPx: 800,   // 実測差分ベースにしたため閾値を下げる
+    enableBeacons: false,
+    autoStart: true,
+    useResizeEvent: true
+  };
+
+  var state = {
+    running: false,
+    timer: null,
+    triggered: false,
+    lastWidth: null,
+    lastHeight: null
+  };
+
+    // 旧式ブラウザ向け: 出力機能が未定義な場合の簡易シム
+  if (!global.console) {
+    global.console = {
+      log: function () {},
+      debug: function () {}
+    };
+  }
+
+    // ブラウザ差異を吸収したビューポート取得（IE11以降を含む）
+  function getViewportSize() {
+    return {
+      width: global.innerWidth || document.documentElement.clientWidth || 0,
+      height: global.innerHeight || document.documentElement.clientHeight || 0
+    };
+  }
+
+    // ビューポートサイズの異常な変化を検出
+  function isAnomalousViewport() {
+    var v = getViewportSize();
+
+    if (state.lastWidth === null || state.lastHeight === null) {
+      state.lastWidth = v.width;
+      state.lastHeight = v.height;
+      return false;
+    }
+
+    var widthDelta = Math.abs(v.width - state.lastWidth);
+    var heightDelta = Math.abs(v.height - state.lastHeight);
+
+    state.lastWidth = v.width;
+    state.lastHeight = v.height;
+
+    return (
+      widthDelta > CONFIG.anomalyThresholdPx ||
+      heightDelta > CONFIG.anomalyThresholdPx
+    );
+  }
+
+  function sendBeaconStub(eventName, payload) {
+    if (!CONFIG.enableBeacons) return;
+
+    if (global.console && global.console.log) {
+      global.console.log("[TelemetrySDK:beacon]", eventName, payload);
+    }
+  }
+
+  function handleCriticalState() {
+    if (state.triggered) return;
+    state.triggered = true;
+
+    sendBeaconStub("viewport_anomaly_detected", getViewportSize());
+
+    alert("{ERR_L2X_0F00C1A9:UI.EXC.0x91B3//DSP_PIPE_STALL::FCOMP_DEF::DBG+SHDW_SYNC;PAGE_CONTAINER::RESIZE_FAILURE}");
+
+    if (document.body) {
+      document.body.style.display = "none";
+    }
+
+    stop();
+  }
+
+  function tick() {
+    if (isAnomalousViewport()) {
+      handleCriticalState();
+    }
+  }
+
+  function onResizeHandler() {
+    tick();
+  }
+
+  function start() {
+    if (state.running) return;
+
+    state.running = true;
+    state.triggered = false;
+
+    state.lastWidth = null;
+    state.lastHeight = null;
+
+    state.timer = setInterval(function () {
+      tick();
+    }, CONFIG.sampleIntervalMs);
+
+    if (CONFIG.useResizeEvent) {
+      if (global.attachEvent) {
+        global.attachEvent("onresize", onResizeHandler);
+      } else if (global.addEventListener) {
+        global.addEventListener("resize", onResizeHandler, false);
+      }
+    }
+  }
+
+  function stop() {
+    if (!state.running) return;
+
+    clearInterval(state.timer);
+    state.timer = null;
+    state.running = false;
+
+    if (global.detachEvent) {
+      global.detachEvent("onresize", onResizeHandler);
+    } else if (global.removeEventListener) {
+      global.removeEventListener("resize", onResizeHandler, false);
+    }
+  }
+
+  global.TelemetrySDK = {
+    version: SDK_VERSION,
+    config: CONFIG,
+    start: start,
+    stop: stop
+  };
+
+  if (CONFIG.autoStart) {
+    start();
+  }
+
+})(window);
+</script>
